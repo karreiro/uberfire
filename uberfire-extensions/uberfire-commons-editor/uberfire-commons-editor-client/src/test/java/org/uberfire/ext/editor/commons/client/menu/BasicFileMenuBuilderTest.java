@@ -26,8 +26,8 @@ import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.UpdatedLockStatusEvent;
 import org.uberfire.ext.editor.commons.client.file.CopyPopup;
 import org.uberfire.ext.editor.commons.client.file.CopyPopupView;
-import org.uberfire.ext.editor.commons.client.file.DeletePopup;
 import org.uberfire.ext.editor.commons.client.file.RenamePopup;
+import org.uberfire.ext.editor.commons.client.file.popups.DeletePopUpPresenter;
 import org.uberfire.ext.editor.commons.client.history.SaveButton;
 import org.uberfire.ext.editor.commons.client.menu.HasLockSyncMenuStateHelper.LockSyncMenuStateHelper.Operation;
 import org.uberfire.ext.editor.commons.client.validation.Validator;
@@ -56,7 +56,7 @@ public class BasicFileMenuBuilderTest {
     private Validator validator;
 
     @Mock
-    private DeletePopup deletePopup;
+    private DeletePopUpPresenter deletePopUpPresenterMock;
 
     @Mock
     private SupportsDelete deleteService;
@@ -86,11 +86,8 @@ public class BasicFileMenuBuilderTest {
         builder = new BasicFileMenuBuilderImpl() {
 
             @Override
-            DeletePopup getDeletePopup( final Path path,
-                                        final Caller<? extends SupportsDelete> deleteCaller ) {
-                assertEquals( mockPath,
-                              path );
-                return deletePopup;
+            public DeletePopUpPresenter getDeletePopUpPresenter() {
+                return deletePopUpPresenterMock;
             }
 
             @Override
@@ -119,8 +116,7 @@ public class BasicFileMenuBuilderTest {
 
     @Test
     public void testDelete() {
-        builder.addDelete( provider,
-                           deleteCaller );
+        builder.addDelete( provider, deleteCaller );
 
         final Menus menus = builder.build();
         final MenuItem mi = menus.getItems().get( 0 );
@@ -128,8 +124,7 @@ public class BasicFileMenuBuilderTest {
 
         mic.getCommand().execute();
 
-        verify( provider,
-                times( 1 ) ).getPath();
+        verify( provider, times( 1 ) ).getPath();
     }
 
     @Test

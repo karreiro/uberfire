@@ -34,10 +34,10 @@ import org.uberfire.commons.validation.PortablePreconditions;
 import org.uberfire.ext.editor.commons.client.file.CommandWithFileNameAndCommitMessage;
 import org.uberfire.ext.editor.commons.client.file.CopyPopup;
 import org.uberfire.ext.editor.commons.client.file.CopyPopupView;
-import org.uberfire.ext.editor.commons.client.file.DeletePopup;
 import org.uberfire.ext.editor.commons.client.file.FileNameAndCommitMessage;
 import org.uberfire.ext.editor.commons.client.file.RenamePopup;
 import org.uberfire.ext.editor.commons.client.file.RenamePopupView;
+import org.uberfire.ext.editor.commons.client.file.popups.DeletePopUpPresenter;
 import org.uberfire.ext.editor.commons.client.menu.HasLockSyncMenuStateHelper.LockSyncMenuStateHelper.Operation;
 import org.uberfire.ext.editor.commons.client.resources.i18n.CommonConstants;
 import org.uberfire.ext.editor.commons.client.validation.Validator;
@@ -66,6 +66,9 @@ public class BasicFileMenuBuilderImpl implements BasicFileMenuBuilder {
 
     @Inject
     private BusyIndicatorView busyIndicatorView;
+
+    @Inject
+    private DeletePopUpPresenter deletePopUpPresenter;
 
     private Command saveCommand = null;
     private MenuItem saveMenuItem;
@@ -100,9 +103,15 @@ public class BasicFileMenuBuilderImpl implements BasicFileMenuBuilder {
         return addDelete( new Command() {
             @Override
             public void execute() {
-                final DeletePopup popup = getDeletePopup( path,
-                                                          deleteCaller );
-                popup.show();
+                getDeletePopUpPresenter().show( new ParameterizedCommand<String>() {
+                    @Override
+                    public void execute( final String comment ) {
+                        busyIndicatorView.showBusyIndicator( CommonConstants.INSTANCE.Deleting() );
+                        deleteCaller.call( getDeleteSuccessCallback(),
+                                           new HasBusyIndicatorDefaultErrorCallback( busyIndicatorView ) ).delete( path,
+                                                                                                                   comment );
+                    }
+                } );
             }
         } );
     }
@@ -114,24 +123,21 @@ public class BasicFileMenuBuilderImpl implements BasicFileMenuBuilder {
             @Override
             public void execute() {
                 final Path path = provider.getPath();
-                final DeletePopup popup = getDeletePopup( path,
-                                                          deleteCaller );
-                popup.show();
+                getDeletePopUpPresenter().show( new ParameterizedCommand<String>() {
+                    @Override
+                    public void execute( final String comment ) {
+                        busyIndicatorView.showBusyIndicator( CommonConstants.INSTANCE.Deleting() );
+                        deleteCaller.call( getDeleteSuccessCallback(),
+                                           new HasBusyIndicatorDefaultErrorCallback( busyIndicatorView ) ).delete( path,
+                                                                                                                   comment );
+                    }
+                } );
             }
         } );
     }
 
-    DeletePopup getDeletePopup( final Path path,
-                                final Caller<? extends SupportsDelete> deleteCaller ) {
-        return new DeletePopup( new ParameterizedCommand<String>() {
-            @Override
-            public void execute( final String comment ) {
-                busyIndicatorView.showBusyIndicator( CommonConstants.INSTANCE.Deleting() );
-                deleteCaller.call( getDeleteSuccessCallback(),
-                                   new HasBusyIndicatorDefaultErrorCallback( busyIndicatorView ) ).delete( path,
-                                                                                                           comment );
-            }
-        } );
+    public DeletePopUpPresenter getDeletePopUpPresenter() {
+        return deletePopUpPresenter;
     }
 
     private RemoteCallback<Void> getDeleteSuccessCallback() {

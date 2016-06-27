@@ -23,6 +23,7 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.backend.vfs.Path;
+import org.uberfire.ext.editor.commons.client.file.popups.SavePopUpPresenter;
 import org.uberfire.ext.editor.commons.client.resources.i18n.CommonConstants;
 import org.uberfire.ext.editor.commons.version.VersionService;
 import org.uberfire.ext.editor.commons.version.events.RestoreEvent;
@@ -44,25 +45,31 @@ public class RestorePopup {
     @Inject
     private RestoreUtil restoreUtil;
 
-    public void show( final ObservablePath currentPath,
-                      final String currentVersionRecordUri ) {
+    @Inject
+    private SavePopUpPresenter savePopUpPresenter;
 
-        new SavePopUp( new ParameterizedCommand<String>() {
+    public void show( final ObservablePath currentPath, final String currentVersionRecordUri ) {
+        savePopUpPresenter.show( new ParameterizedCommand<String>() {
+
             @Override
             public void execute( final String comment ) {
                 busyIndicatorView.showBusyIndicator( CommonConstants.INSTANCE.Restoring() );
-                versionService.call( getRestorationSuccessCallback( currentVersionRecordUri ),
-                                     new HasBusyIndicatorDefaultErrorCallback( busyIndicatorView ) ).restore( currentPath, comment );
+                versionService.call(
+                        getRestorationSuccessCallback( currentVersionRecordUri ),
+                        new HasBusyIndicatorDefaultErrorCallback( busyIndicatorView ) ).restore( currentPath, comment );
             }
-        } ).show();
+        } );
     }
 
     private RemoteCallback<Path> getRestorationSuccessCallback( final String currentVersionRecordUri ) {
         return new RemoteCallback<Path>() {
+
             @Override
             public void callback( final Path restored ) {
                 busyIndicatorView.hideBusyIndicator();
-                restoreEvent.fire( new RestoreEvent( restoreUtil.createObservablePath( restored, currentVersionRecordUri ) ) );
+                restoreEvent.fire( new RestoreEvent( restoreUtil.createObservablePath(
+                        restored,
+                        currentVersionRecordUri ) ) );
             }
         };
     }

@@ -41,7 +41,7 @@ import org.uberfire.client.mvp.UberView;
 import org.uberfire.client.workbench.events.ChangeTitleWidgetEvent;
 import org.uberfire.ext.editor.commons.client.BaseEditor;
 import org.uberfire.ext.editor.commons.client.BaseEditorView;
-import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
+import org.uberfire.ext.editor.commons.client.file.popups.SavePopUpPresenter;
 import org.uberfire.ext.editor.commons.client.validation.Validator;
 import org.uberfire.ext.editor.commons.service.support.SupportsCopy;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
@@ -67,12 +67,12 @@ import org.uberfire.workbench.model.menu.Menus;
 import static org.uberfire.ext.editor.commons.client.menu.MenuItems.*;
 
 @Dependent
-@WorkbenchEditor(identifier = "Dynamic Menu Editor", supportedTypes = { DynamicMenuResourceType.class }, priority = Integer.MAX_VALUE)
+@WorkbenchEditor(identifier = "Dynamic Menu Editor", supportedTypes = {DynamicMenuResourceType.class}, priority = Integer.MAX_VALUE)
 public class DynamicMenuEditorPresenter
         extends BaseEditor {
 
     public interface View extends UberView<DynamicMenuEditorPresenter>,
-                                  BaseEditorView {
+            BaseEditorView {
 
         String emptyActivityID();
 
@@ -100,6 +100,9 @@ public class DynamicMenuEditorPresenter
     @Inject
     private PluginNameValidator pluginNameValidator;
 
+    @Inject
+    private SavePopUpPresenter savePopUpPresenter;
+
     private ListDataProvider<DynamicMenuItem> dataProvider = new ListDataProvider<DynamicMenuItem>();
 
     private DynamicMenu menuItem;
@@ -112,24 +115,28 @@ public class DynamicMenuEditorPresenter
     }
 
     @OnStartup
-    public void onStartup( final ObservablePath path,
-                           final PlaceRequest place ) {
-        init( path,
-              place,
-              resourceType,
-              true,
-              false,
-              SAVE,
-              COPY,
-              RENAME,
-              DELETE );
+    public void onStartup(
+            final ObservablePath path,
+            final PlaceRequest place ) {
+        init(
+                path,
+                place,
+                resourceType,
+                true,
+                false,
+                SAVE,
+                COPY,
+                RENAME,
+                DELETE );
 
         // This is only used to define the "name" used by @WorkbenchPartTitle which is called by Uberfire after @OnStartup
         // but before the async call in "loadContent()" has returned. When the *real* plugin is loaded this is overwritten
-        this.plugin = new Plugin( place.getParameter( "name",
-                                                      "" ),
-                                  PluginType.DYNAMIC_MENU,
-                                  path );
+        this.plugin = new Plugin(
+                place.getParameter(
+                        "name",
+                        "" ),
+                PluginType.DYNAMIC_MENU,
+                path );
     }
 
     @WorkbenchPartTitleDecoration
@@ -150,12 +157,14 @@ public class DynamicMenuEditorPresenter
     protected void onPlugInRenamed( @Observes final PluginRenamed pluginRenamed ) {
         if ( pluginRenamed.getOldPluginName().equals( plugin.getName() ) &&
                 pluginRenamed.getPlugin().getType().equals( plugin.getType() ) ) {
-            plugin = new Plugin( pluginRenamed.getPlugin().getName(),
-                                 PluginType.DYNAMIC_MENU,
-                                 pluginRenamed.getPlugin().getPath() );
-            changeTitleNotification.fire( new ChangeTitleWidgetEvent( place,
-                                                                      getTitleText(),
-                                                                      getTitle() ) );
+            plugin = new Plugin(
+                    pluginRenamed.getPlugin().getName(),
+                    PluginType.DYNAMIC_MENU,
+                    pluginRenamed.getPlugin().getPath() );
+            changeTitleNotification.fire( new ChangeTitleWidgetEvent(
+                    place,
+                    getTitleText(),
+                    getTitle() ) );
         }
     }
 
@@ -163,12 +172,16 @@ public class DynamicMenuEditorPresenter
         return NameValidator.createNameValidator( getView().emptyActivityID(), getView().invalidActivityID() );
     }
 
-    public RuleValidator getMenuItemLabelValidator( final DynamicMenuItem menuItem,
-                                                    final DynamicMenuItem editedMenuItem ) {
+    public RuleValidator getMenuItemLabelValidator(
+            final DynamicMenuItem menuItem,
+            final DynamicMenuItem editedMenuItem ) {
         return new RuleValidator() {
+
             private String error;
 
-            private NameValidator menuLabelValidator = NameValidator.createNameValidator( getView().emptyMenuLabel(), getView().invalidMenuLabel() );
+            private NameValidator menuLabelValidator = NameValidator.createNameValidator(
+                    getView().emptyMenuLabel(),
+                    getView().invalidMenuLabel() );
 
             @Override
             public boolean isValid( final String value ) {
@@ -207,8 +220,9 @@ public class DynamicMenuEditorPresenter
         dataProvider.flush();
     }
 
-    public DynamicMenuItem getExistingMenuItem( final DynamicMenuItem currentMenuItem,
-                                                final DynamicMenuItem editedMenuItem ) {
+    public DynamicMenuItem getExistingMenuItem(
+            final DynamicMenuItem currentMenuItem,
+            final DynamicMenuItem editedMenuItem ) {
         DynamicMenuItem existingItem = null;
 
         for ( final DynamicMenuItem item : getDynamicMenuItems() ) {
@@ -225,9 +239,10 @@ public class DynamicMenuEditorPresenter
         getDynamicMenuItems().remove( object );
     }
 
-    public void updateIndex( final DynamicMenuItem object,
-                             final int index,
-                             final UpdateIndexOperation operation ) {
+    public void updateIndex(
+            final DynamicMenuItem object,
+            final int index,
+            final UpdateIndexOperation operation ) {
         if ( index < 0 ) {
             return;
         }
@@ -240,8 +255,9 @@ public class DynamicMenuEditorPresenter
 
         final DynamicMenuItem oldItem = getDynamicMenuItems().set( newIndex, object );
         if ( oldItem != null ) {
-            getDynamicMenuItems().set( index,
-                                       oldItem );
+            getDynamicMenuItems().set(
+                    index,
+                    oldItem );
         }
     }
 
@@ -257,6 +273,7 @@ public class DynamicMenuEditorPresenter
     @Override
     protected void loadContent() {
         getPluginServices().call( new RemoteCallback<DynamicMenu>() {
+
             @Override
             public void callback( final DynamicMenu response ) {
                 setOriginalHash( response.hashCode() );
@@ -276,6 +293,7 @@ public class DynamicMenuEditorPresenter
 
     protected Command onValidate() {
         return new Command() {
+
             @Override
             public void execute() {
                 final Collection<String> invalidActivities = new HashSet<String>();
@@ -285,11 +303,13 @@ public class DynamicMenuEditorPresenter
                     }
                 }
                 if ( invalidActivities.isEmpty() ) {
-                    notification.fire( new NotificationEvent( "Item Validated Successfully",
-                                                              NotificationEvent.NotificationType.SUCCESS ) );
+                    notification.fire( new NotificationEvent(
+                            "Item Validated Successfully",
+                            NotificationEvent.NotificationType.SUCCESS ) );
                 } else {
-                    notification.fire( new NotificationEvent( "Activity(ies) not found: '" + DynamicMenuEditorPresenter.this.toString( invalidActivities ) + "'",
-                                                              NotificationEvent.NotificationType.ERROR ) );
+                    notification.fire( new NotificationEvent(
+                            "Activity(ies) not found: '" + DynamicMenuEditorPresenter.this.toString( invalidActivities ) + "'",
+                            NotificationEvent.NotificationType.ERROR ) );
                 }
             }
         };
@@ -300,20 +320,24 @@ public class DynamicMenuEditorPresenter
         for ( final String string : invalidActivities ) {
             result.append( string ).append( "," );
         }
-        return result.length() > 0 ? result.substring( 0,
-                                                       result.length() - 1 ) : "";
+        return result.length() > 0 ? result.substring(
+                0,
+                result.length() - 1 ) : "";
     }
 
     protected void save() {
-        new SaveOperationService().save( versionRecordManager.getCurrentPath(),
-                                         new ParameterizedCommand<String>() {
-                                             @Override
-                                             public void execute( final String commitMessage ) {
-                                                 getPluginServices().call( getSaveSuccessCallback( getContent().hashCode() ) ).saveMenu( getContent(),
-                                                                                                                                         commitMessage );
-                                             }
-                                         }
-                                       );
+        savePopUpPresenter.show(
+                versionRecordManager.getCurrentPath(),
+                new ParameterizedCommand<String>() {
+
+                    @Override
+                    public void execute( final String commitMessage ) {
+                        getPluginServices().call( getSaveSuccessCallback( getContent().hashCode() ) ).saveMenu(
+                                getContent(),
+                                commitMessage );
+                    }
+                }
+        );
         concurrentUpdateSessionInfo = null;
     }
 
@@ -328,10 +352,11 @@ public class DynamicMenuEditorPresenter
     }
 
     public DynamicMenu getContent() {
-        return new DynamicMenu( menuItem.getName(),
-                                PluginType.DYNAMIC_MENU,
-                                versionRecordManager.getCurrentPath(),
-                                new ArrayList<DynamicMenuItem>( getDynamicMenuItems() ) );
+        return new DynamicMenu(
+                menuItem.getName(),
+                PluginType.DYNAMIC_MENU,
+                versionRecordManager.getCurrentPath(),
+                new ArrayList<DynamicMenuItem>( getDynamicMenuItems() ) );
     }
 
     @Override

@@ -32,7 +32,7 @@ import org.uberfire.client.workbench.events.ChangeTitleWidgetEvent;
 import org.uberfire.client.workbench.type.ClientResourceType;
 import org.uberfire.ext.editor.commons.client.BaseEditor;
 import org.uberfire.ext.editor.commons.client.BaseEditorView;
-import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
+import org.uberfire.ext.editor.commons.client.file.popups.SavePopUpPresenter;
 import org.uberfire.ext.editor.commons.client.validation.Validator;
 import org.uberfire.ext.editor.commons.service.support.SupportsCopy;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
@@ -80,6 +80,9 @@ public abstract class RuntimePluginBaseEditor extends BaseEditor {
     @Inject
     private ActivityBeansInfo activityBeansInfo;
 
+    @Inject
+    private SavePopUpPresenter savePopUpPresenter;
+
     protected RuntimePluginBaseEditor( final BaseEditorView baseView ) {
         this.baseView = baseView;
     }
@@ -89,24 +92,28 @@ public abstract class RuntimePluginBaseEditor extends BaseEditor {
     protected abstract ClientResourceType getResourceType();
 
     @OnStartup
-    public void onStartup( final ObservablePath path,
-                           final PlaceRequest place ) {
-        init( path,
-              place,
-              getResourceType(),
-              true,
-              false,
-              SAVE,
-              COPY,
-              RENAME,
-              DELETE );
+    public void onStartup(
+            final ObservablePath path,
+            final PlaceRequest place ) {
+        init(
+                path,
+                place,
+                getResourceType(),
+                true,
+                false,
+                SAVE,
+                COPY,
+                RENAME,
+                DELETE );
 
         // This is only used to define the "name" used by @WorkbenchPartTitle which is called by Uberfire after @OnStartup
         // but before the async call in "loadContent()" has returned. When the *real* plugin is loaded this is overwritten
-        this.plugin = new Plugin( place.getParameter( "name",
-                                                      "" ),
-                                  getPluginType(),
-                                  path );
+        this.plugin = new Plugin(
+                place.getParameter(
+                        "name",
+                        "" ),
+                getPluginType(),
+                path );
 
         this.place = place;
     }
@@ -114,12 +121,14 @@ public abstract class RuntimePluginBaseEditor extends BaseEditor {
     protected void onPlugInRenamed( @Observes final PluginRenamed pluginRenamed ) {
         if ( pluginRenamed.getOldPluginName().equals( plugin.getName() ) &&
                 pluginRenamed.getPlugin().getType().equals( plugin.getType() ) ) {
-            this.plugin = new Plugin( pluginRenamed.getPlugin().getName(),
-                                      getPluginType(),
-                                      pluginRenamed.getPlugin().getPath() );
-            changeTitleNotification.fire( new ChangeTitleWidgetEvent( place,
-                                                                      getTitleText(),
-                                                                      getTitle() ) );
+            this.plugin = new Plugin(
+                    pluginRenamed.getPlugin().getName(),
+                    getPluginType(),
+                    pluginRenamed.getPlugin().getPath() );
+            changeTitleNotification.fire( new ChangeTitleWidgetEvent(
+                    place,
+                    getTitleText(),
+                    getTitle() ) );
         }
     }
 
@@ -138,10 +147,12 @@ public abstract class RuntimePluginBaseEditor extends BaseEditor {
     @Override
     protected void loadContent() {
         getPluginServices().call( new RemoteCallback<PluginContent>() {
+
             @Override
             public void callback( final PluginContent response ) {
                 view().setFramework( response.getFrameworks() );
                 view().setupContent( response, new ParameterizedCommand<Media>() {
+
                     @Override
                     public void execute( final Media media ) {
                         getPluginServices().call().deleteMedia( media );
@@ -163,15 +174,18 @@ public abstract class RuntimePluginBaseEditor extends BaseEditor {
     }
 
     protected void save() {
-        new SaveOperationService().save( getCurrentPath(),
-                                         new ParameterizedCommand<String>() {
-                                             @Override
-                                             public void execute( final String commitMessage ) {
-                                                 pluginServices.call( getSaveSuccessCallback( getContent().hashCode() ) ).save( getContent(),
-                                                                                                                                commitMessage );
-                                             }
-                                         }
-                                       );
+        savePopUpPresenter.show(
+                getCurrentPath(),
+                new ParameterizedCommand<String>() {
+
+                    @Override
+                    public void execute( final String commitMessage ) {
+                        pluginServices.call( getSaveSuccessCallback( getContent().hashCode() ) ).save(
+                                getContent(),
+                                commitMessage );
+                    }
+                }
+        );
         concurrentUpdateSessionInfo = null;
     }
 

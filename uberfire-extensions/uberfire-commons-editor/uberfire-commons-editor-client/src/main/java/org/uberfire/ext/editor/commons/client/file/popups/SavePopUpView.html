@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2015 JBoss, by Red Hat, Inc
+  ~ Copyright 2016 Red Hat, Inc. and/or its affiliates.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,16 +14,10 @@
   ~ limitations under the License.
   -->
 
-<module>
-
-  <inherits name="org.gwtbootstrap3.GwtBootstrap3NoTheme"/>
-  <inherits name="org.uberfire.UberfireClientAll"/>
-  <inherits name="org.uberfire.UberfireWorkbench"/>
-  <inherits name="org.uberfire.ext.widgets.common.UberfireWidgetsCommons"/>
-  <inherits name="org.uberfire.ext.editor.commons.UberfireCommonsEditorAPI"/>
-
-  <set-property name="gwt.logging.enabled" value="TRUE"/>
-
-  <source path='client'/>
-
-</module>
+<div data-field="view">
+    <form>
+        <p data-i18n-key="SaveChangesForThisAsset"></p>
+        <a href="#" data-field="addComment" data-i18n-key="AddAComment"></a>
+        <input type="text" class="form-control" data-field="commentTextBox"/>
+    </form>
+</div>
