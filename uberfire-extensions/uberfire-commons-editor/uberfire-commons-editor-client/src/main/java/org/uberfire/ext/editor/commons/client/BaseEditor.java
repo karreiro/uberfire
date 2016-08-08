@@ -22,9 +22,9 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.New;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.common.client.api.Caller;
@@ -111,7 +111,7 @@ public abstract class BaseEditor {
                          final boolean displayShowMoreVersions,
                          final MenuItems... menuItems ) {
 
-        init(path, place, type, addFileChangeListeners, displayShowMoreVersions, Arrays.asList( menuItems ) );
+        init( path, place, type, addFileChangeListeners, displayShowMoreVersions, Arrays.asList( menuItems ) );
     }
 
     protected void init( final ObservablePath path,
@@ -164,6 +164,7 @@ public abstract class BaseEditor {
 
     private void buildMenuBar() {
         if ( menuBuilder != null ) {
+            GWT.log( "+ 2 +" );
             menus = menuBuilder.build();
         }
     }
@@ -199,7 +200,9 @@ public abstract class BaseEditor {
             menuBuilder.addDelete( versionRecordManager.getCurrentPath(), getDeleteServiceCaller() );
         }
         if ( menuItems.contains( VALIDATE ) ) {
-            menuBuilder.addValidate( onValidate() );
+            Command command = onValidate();
+            GWT.log( command.toString() );
+            menuBuilder.addValidate( command );
         }
         if ( menuItems.contains( HISTORY ) ) {
             menuBuilder.addNewTopLevelMenu( versionRecordManager.buildMenu() );

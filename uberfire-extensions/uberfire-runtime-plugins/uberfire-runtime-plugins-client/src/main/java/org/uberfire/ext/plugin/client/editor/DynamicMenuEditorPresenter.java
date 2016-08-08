@@ -25,6 +25,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
@@ -280,10 +281,11 @@ public class DynamicMenuEditorPresenter
     }
 
     protected Command onValidate() {
+        GWT.log( "===> maybe 31" );
         return new Command() {
-
             @Override
             public void execute() {
+                GWT.log( "===> maybe 3" );
                 final Collection<String> invalidActivities = new HashSet<String>();
                 for ( final DynamicMenuItem dynamicMenuItem : getDynamicMenuItems() ) {
                     if ( activityBeansCache.getActivity( dynamicMenuItem.getActivityId() ) == null ) {

@@ -16,6 +16,7 @@
 
 package org.uberfire.ext.editor.commons.client.menu;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.junit.Before;
 import org.junit.Test;
@@ -163,6 +164,7 @@ public class BasicFileMenuBuilderTest {
         builder.addRename( mock( Command.class ) );
         builder.addDelete( mock( Command.class ) );
 
+        GWT.log( "+ 3 +" );
         final Menus menus = builder.build();
 
         final UpdatedLockStatusEvent event = new UpdatedLockStatusEvent( mock( Path.class ),
@@ -232,6 +234,7 @@ public class BasicFileMenuBuilderTest {
                                               final boolean isLocked,
                                               final boolean isLockedByCurrentUser ) -> Operation.DISABLE );
 
+        GWT.log("+ 5 +");
         final Menus menus = builder.build();
 
         //Not locked, MenuItems should normally be enabled however our custom helper forces disable

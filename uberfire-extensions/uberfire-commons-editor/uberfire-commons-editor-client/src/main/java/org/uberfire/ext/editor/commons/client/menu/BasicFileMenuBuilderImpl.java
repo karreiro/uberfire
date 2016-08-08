@@ -24,6 +24,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -375,6 +376,8 @@ public class BasicFileMenuBuilderImpl implements BasicFileMenuBuilder {
         }
 
         if ( validateCommand != null ) {
+            GWT.log( "finally +++++++" );
+            GWT.log( validateCommand.toString() );
             menuItems.put( MenuItems.VALIDATE, MenuFactory.newTopLevelMenu( CommonConstants.INSTANCE.Validate() )
                     .respondsWith( validateCommand )
                     .endMenu()
