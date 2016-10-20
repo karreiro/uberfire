@@ -49,45 +49,46 @@ public class FileUploadServlet
     protected void doPost( HttpServletRequest request,
                            HttpServletResponse response ) throws ServletException, IOException {
 
+        request.setCharacterEncoding( "UTF-8" );
+
+        final String path = request.getParameter( PARAM_PATH );
+        final String folder = request.getParameter( PARAM_FOLDER );
+        final String fileName = request.getParameter( PARAM_FILENAME );
+
         try {
-            if ( request.getParameter( PARAM_PATH ) != null ) {
-
-                //See https://bugzilla.redhat.com/show_bug.cgi?id=1202926
-                final String encodedPath = FileServletUtil.encodeFileNamePart( request.getParameter( PARAM_PATH ) );
-                final URI uri = new URI( encodedPath );
-
+            if ( path != null || folder != null ) {
                 final FileItem fileItem = getFileItem( request );
-
-                finalizeResponse( response, fileItem, uri );
-
-            } else if ( request.getParameter( PARAM_FOLDER ) != null ) {
-
-                //See https://bugzilla.redhat.com/show_bug.cgi?id=1202926
-                final String encodedFileName = FileServletUtil.encodeFileName( request.getParameter( PARAM_FILENAME ) );
-                final URI uri = new URI( request.getParameter( PARAM_FOLDER ) + "/" + encodedFileName );
-
-                final FileItem fileItem = getFileItem( request );
+                final URI uri = getUri( path, folder, fileName );
 
                 finalizeResponse( response, fileItem, uri );
             }
 
         } catch ( FileUploadException e ) {
             logError( e );
-            writeResponse( response,
-                           RESPONSE_FAIL );
+            writeResponse( response, RESPONSE_FAIL );
 
         } catch ( URISyntaxException e ) {
             logError( e );
-            writeResponse( response,
-                           RESPONSE_FAIL );
+            writeResponse( response, RESPONSE_FAIL );
+        }
+    }
+
+    private URI getUri( final String path,
+                        final String folder,
+                        final String fileName ) throws URISyntaxException {
+        //See https://bugzilla.redhat.com/show_bug.cgi?id=1202926
+
+        if ( path != null ) {
+            return new URI( FileServletUtil.encodeFileNamePart( path ) );
+        } else {
+            return new URI( folder + "/" + FileServletUtil.encodeFileName( fileName ) );
         }
     }
 
     private void finalizeResponse( HttpServletResponse response,
                                    FileItem fileItem,
                                    URI uri ) throws IOException {
-        if ( !validateAccess( uri,
-                              response ) ) {
+        if ( !validateAccess( uri, response ) ) {
             return;
         }
 
@@ -107,5 +108,4 @@ public class FileUploadServlet
         }
         return "";
     }
-
 }

@@ -169,8 +169,10 @@ public class FileUploadServletTest {
         //FileUploadServlet uploadServlet = new FileUploadServlet();
         uploadServlet.doPost( request, response );
 
+        verify( request, times( 1 ) ).setCharacterEncoding( "UTF-8" );
+
         verify( request, times( 1 ) ).getParameter( PARAM_PATH );
-        verify( request, times( 2 ) ).getParameter( PARAM_FOLDER );
+        verify( request, times( 1 ) ).getParameter( PARAM_FOLDER );
         verify( request, times( 1 ) ).getParameter( PARAM_FILENAME );
 
         //Expected URI
@@ -211,7 +213,9 @@ public class FileUploadServletTest {
 
         uploadServlet.doPost( request, response );
 
-        verify( request, times( 2 ) ).getParameter( PARAM_PATH );
+        verify( request, times( 1 ) ).setCharacterEncoding( "UTF-8" );
+
+        verify( request, times( 1 ) ).getParameter( PARAM_PATH );
 
         //Expected URI
         URI expectedURI = new URI( FileServletUtil.encodeFileNamePart( targetPath ) );
