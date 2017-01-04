@@ -197,7 +197,7 @@
               <outputDirectory>${project.build.outputDirectory}/org/uberfire/client/views/static/patternfly/less</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${project.build.directory}/patternfly/META-INF/resources/webjars/patternfly/${version.org.webjars.bower.org.patternfly}/less</directory>
+                  <directory>${project.build.directory}/patternfly/META-INF/resources/webjars/patternfly/${version.org.webjars.bower.org.patternfly}/src/less</directory>
                   <includes>
                     <include>**</include>
                   </includes>

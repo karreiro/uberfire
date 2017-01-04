@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.New;
 import javax.inject.Inject;
 
 import com.google.gwt.core.client.Scheduler;
