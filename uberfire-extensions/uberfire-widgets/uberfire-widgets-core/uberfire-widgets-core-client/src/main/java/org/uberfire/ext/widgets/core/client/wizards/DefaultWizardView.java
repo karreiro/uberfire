@@ -22,11 +22,13 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.ui.IsWidget;
 import org.gwtbootstrap3.client.ui.Column;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.base.modal.ModalDialog;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.uberfire.client.mvp.UberView;
 import org.uberfire.ext.widgets.common.client.common.popups.BaseModal;
 
 import com.google.gwt.core.client.GWT;
@@ -39,9 +41,8 @@ import com.google.gwt.user.client.ui.Widget;
  * The generic Wizard view implementation
  */
 @Dependent
-public class WizardViewImpl extends BaseModal
-        implements
-        WizardView {
+public class DefaultWizardView extends BaseModal implements IsWidget,
+                                                            WizardView {
 
     @Inject
     private SyncBeanManager iocBeanManager;
@@ -61,15 +62,13 @@ public class WizardViewImpl extends BaseModal
 
     private AbstractWizard presenter;
 
-    interface WizardActivityViewImplBinder
-            extends
-            UiBinder<Widget, WizardViewImpl> {
+    interface WizardActivityViewImplBinder extends UiBinder<Widget, DefaultWizardView> {
 
     }
 
     private static WizardActivityViewImplBinder uiBinder = GWT.create( WizardActivityViewImplBinder.class );
 
-    public WizardViewImpl() {
+    public DefaultWizardView() {
         footer = new WizardPopupFooter(
                 new Command() {
                     @Override
@@ -105,7 +104,7 @@ public class WizardViewImpl extends BaseModal
                 }
         );
 
-        setBody( uiBinder.createAndBindUi( WizardViewImpl.this ) );
+        setBody( uiBinder.createAndBindUi( DefaultWizardView.this ) );
 
         add( footer );
     }
@@ -193,5 +192,4 @@ public class WizardViewImpl extends BaseModal
     public void show() {
         super.show();
     }
-
 }

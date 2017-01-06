@@ -26,13 +26,13 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
-public class WizardViewImplTest {
+public class DefaultWizardViewTest {
 
     @Mock
     WizardPopupFooter footer;
 
     @GwtMock
-    WizardViewImpl view;
+    DefaultWizardView view;
 
     @Before
     public void init() {

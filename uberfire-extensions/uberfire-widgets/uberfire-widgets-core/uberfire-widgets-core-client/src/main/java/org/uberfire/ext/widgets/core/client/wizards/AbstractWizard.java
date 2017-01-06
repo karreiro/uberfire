@@ -32,14 +32,11 @@ import org.uberfire.client.callbacks.Callback;
 public abstract class AbstractWizard implements
                                      Wizard {
 
-    @Inject
-    //The generic view
-    protected WizardView view;
     protected boolean isStarted = false;
 
     @PostConstruct
     public void setup() {
-        view.init( this );
+        getView().init( this );
     }
 
     //Update the status of each belonging to this Wizard
@@ -64,7 +61,7 @@ public abstract class AbstractWizard implements
             wp.isComplete( new Callback<Boolean>() {
                 @Override
                 public void callback( final Boolean result ) {
-                    view.setPageCompletionState( index,
+                    getView().setPageCompletionState( index,
                                                  Boolean.TRUE.equals( result ) );
                 }
             } );
@@ -74,7 +71,7 @@ public abstract class AbstractWizard implements
         isComplete( new Callback<Boolean>() {
             @Override
             public void callback( final Boolean result ) {
-                view.setCompletionStatus( Boolean.TRUE.equals( result ) );
+                getView().setCompletionStatus( Boolean.TRUE.equals( result ) );
             }
         } );
 
@@ -87,39 +84,46 @@ public abstract class AbstractWizard implements
         }
         final WizardPage page = event.getSelectedPage();
         final int index = getPages().indexOf( page );
-        view.selectPage( index );
+        getView().selectPage( index );
     }
 
     @Override
     public void start() {
         //Go, Go gadget Wizard!
         isStarted = true;
-        view.setTitle( getTitle() );
-        view.setPreferredHeight( getPreferredHeight() );
-        view.setPreferredWidth( getPreferredWidth() );
-        view.setPageTitles( getPages() );
+        getView().setTitle( getTitle() );
+        getView().setPreferredHeight( getPreferredHeight() );
+        getView().setPreferredWidth( getPreferredWidth() );
+        getView().setPageTitles( getPages() );
 
         //Ensure Wizard's generic Cancel/Finish buttons are set correctly
         checkPagesState();
 
-        view.selectPage( 0 );
-        view.show();
+        getView().selectPage( 0 );
+        getView().show();
     }
 
     @Override
     public void pageSelected( final int pageNumber ) {
         final Widget w = getPageWidget( pageNumber );
-        view.setBodyWidget( w );
+        getView().setBodyWidget( w );
     }
 
     @Override
     public void close() {
-        view.hide();
+        getView().hide();
     }
 
     @Override
     public void complete() {
-        view.hide();
+        getView().hide();
     }
 
+
+    @Inject
+    protected WizardView view;
+
+    protected WizardView getView() {
+        return view;
+    };
 }
