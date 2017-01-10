@@ -22,7 +22,8 @@ import javax.inject.Inject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.common.client.dom.DOMTokenList;
-import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.common.client.dom.Element;
+import org.jboss.errai.common.client.dom.ListItem;
 import org.jboss.errai.common.client.dom.Span;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -36,7 +37,7 @@ public class AdvancedWizardStepView implements AdvancedWizardStep.View,
 
     @Inject
     @DataField("wizard-step-container")
-    private Div container;
+    private ListItem container;
 
     @Inject
     @DataField("container-anchor")
@@ -55,9 +56,6 @@ public class AdvancedWizardStepView implements AdvancedWizardStep.View,
     @Override
     public void init( final AdvancedWizardStep presenter ) {
         this.presenter = presenter;
-
-        stepNumber.setTextContent( presenter.getStepNumber() );
-        stepTitle.setTextContent( presenter.getStepTitle() );
     }
 
     @EventHandler("container-anchor")
@@ -75,10 +73,25 @@ public class AdvancedWizardStepView implements AdvancedWizardStep.View,
         toggleClass( container, "complete", isComplete );
     }
 
-    private void toggleClass( final Div element,
+    @Override
+    public Element getContainer() {
+        return container;
+    }
+
+    @Override
+    public void setStepNumber( final String stepNumber ) {
+        this.stepNumber.setTextContent( stepNumber );
+    }
+
+    @Override
+    public void setStepTitle( final String stepTitle ) {
+        this.stepTitle.setTextContent( stepTitle );
+    }
+
+    private void toggleClass( final ListItem li,
                               final String className,
                               final boolean toggle ) {
-        final DOMTokenList classList = element.getClassList();
+        final DOMTokenList classList = li.getClassList();
 
         if ( toggle ) {
             classList.add( className );

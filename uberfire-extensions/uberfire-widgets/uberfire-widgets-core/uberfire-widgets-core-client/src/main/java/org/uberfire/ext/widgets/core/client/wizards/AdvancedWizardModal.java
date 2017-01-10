@@ -22,7 +22,7 @@ import org.uberfire.ext.widgets.common.client.common.popups.BaseModal;
 
 class AdvancedWizardModal {
 
-    private static final String WIZARD_DIALOG_CLASS_NAME = "wizard-pf";
+    private static final String WIZARD_DIALOG_CLASS_NAME = "wizard-pf advanced-wizard";
     private static final String WIZARD_BODY_CLASS_NAME = "wizard-pf-body";
     private static final String WIZARD_FOOTER_CLASS_NAME = "wizard-pf-footer";
 

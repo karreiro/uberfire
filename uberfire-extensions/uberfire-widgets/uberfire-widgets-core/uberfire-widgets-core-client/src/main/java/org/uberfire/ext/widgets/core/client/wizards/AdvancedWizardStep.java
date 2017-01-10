@@ -16,10 +16,12 @@
 
 package org.uberfire.ext.widgets.core.client.wizards;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.dom.Element;
 import org.jboss.errai.common.client.dom.Node;
 import org.uberfire.client.mvp.UberElement;
 
@@ -40,7 +42,18 @@ public class AdvancedWizardStep {
         this.pageNumber = pageNumber;
         this.page = page;
 
+        setupView();
         setupIsCompleted();
+    }
+
+    @PostConstruct
+    public void setup() {
+        view.init( this );
+    }
+
+    private void setupView() {
+        view.setStepNumber( stepNumber() );
+        view.setStepTitle( stepTitle() );
     }
 
     private void setupIsCompleted() {
@@ -48,27 +61,27 @@ public class AdvancedWizardStep {
     }
 
     public Node getStep() {
-        return view.getElement();
+        return view.getContainer();
     }
 
-    public void setPageSelected( final boolean isSelected ) {
-        view.setActive( isSelected );
-    }
-
-    String getStepNumber() {
-        return Integer.toString( pageNumber + 1 );
-    }
-
-    String getStepTitle() {
-        return page.getTitle();
+    public void setComplete( final boolean isComplete ) {
+        view.setComplete( isComplete );
     }
 
     void selectPage() {
         selectPageEvent.fire( new WizardPageSelectedEvent( page ) );
     }
 
-    public void setComplete( final boolean isComplete ) {
-        view.setComplete( isComplete );
+    void setPageSelected( final boolean isSelected ) {
+        view.setActive( isSelected );
+    }
+
+    private String stepNumber() {
+        return Integer.toString( pageNumber + 1 );
+    }
+
+    private String stepTitle() {
+        return page.getTitle();
     }
 
     public interface View extends UberElement<AdvancedWizardStep> {
@@ -76,5 +89,11 @@ public class AdvancedWizardStep {
         void setActive( boolean isActive );
 
         void setComplete( boolean isComplete );
+
+        Element getContainer();
+
+        void setStepNumber( String stepNumber );
+
+        void setStepTitle( String stepTitle );
     }
 }

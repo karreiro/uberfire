@@ -49,6 +49,7 @@ public class AdvancedWizardView implements IsWidget,
     @Inject
     @DataField("content")
     private Div content;
+
     @Inject
     @DataField("body")
     private Div body;
@@ -149,6 +150,8 @@ public class AdvancedWizardView implements IsWidget,
 
     @Override
     public void setPageTitles( final List<WizardPage> pages ) {
+        clearSteps();
+
         for ( int index = 0; index < pages.size(); index++ ) {
             final WizardPage page = pages.get( index );
             final AdvancedWizardStep wizardStep = stepManagedInstance.get();
@@ -159,6 +162,11 @@ public class AdvancedWizardView implements IsWidget,
         }
 
         pageNumberTotal = pages.size();
+    }
+
+    private void clearSteps() {
+        stepPresenters.clear();
+        steps.setTextContent( "" );
     }
 
     private void addStep( final AdvancedWizardStep wizardStep ) {
