@@ -16,6 +16,7 @@
 
 package org.uberfire.ext.wires.core.grids.client.widget.scrollbars;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -33,27 +34,27 @@ class GridLienzoScrollUI {
     }
 
     void setup() {
-        applyMainPanelStyle();
-        applyMakeInternalScrollPanel();
+        applyScrollPanelStyle();
+        applyInternalScrollPanelStyle();
         applyDomElementContainerStyle();
     }
 
-    void applyMainPanelStyle() {
-        style(getMainPanel()).setPosition(Style.Position.RELATIVE);
-        style(getMainPanel()).setOverflow(Style.Overflow.SCROLL);
-        style(getMainPanel()).setZIndex(1);
+    void applyScrollPanelStyle() {
+        style(getScrollPanel()).setPosition(Style.Position.RELATIVE);
+        style(getScrollPanel()).setOverflow(Style.Overflow.SCROLL);
     }
 
-    void applyMakeInternalScrollPanel() {
+    void applyInternalScrollPanelStyle() {
         style(getInternalScrollPanel()).setPosition(Style.Position.ABSOLUTE);
     }
 
     void applyDomElementContainerStyle() {
-        style(getDomElementContainer()).setPosition(Style.Position.FIXED);
+        style(getDomElementContainer()).setPosition(Style.Position.ABSOLUTE);
+        style(getDomElementContainer()).setZIndex(1);
     }
 
-    private AbsolutePanel getMainPanel() {
-        return gridLienzoScrollHandler.getMainPanel();
+    private AbsolutePanel getScrollPanel() {
+        return gridLienzoScrollHandler.getScrollPanel();
     }
 
     private AbsolutePanel getInternalScrollPanel() {
@@ -62,6 +63,19 @@ class GridLienzoScrollUI {
 
     private AbsolutePanel getDomElementContainer() {
         return gridLienzoScrollHandler.getDomElementContainer();
+    }
+
+    void enablePointerEvents(final Widget widget) {
+        setPointerEvents(widget, "initial");
+    }
+
+    void disablePointerEvents(final Widget widget) {
+        setPointerEvents(widget, "none");
+    }
+
+    void setPointerEvents(final Widget widget,
+                          final String value) {
+        style(widget).setProperty("pointerEvents", value);
     }
 
     Style style(final Widget widget) {

@@ -17,6 +17,7 @@ package org.uberfire.ext.wires.core.grids.client.widget.layer.impl;
 
 import com.ait.lienzo.client.core.shape.Viewport;
 import com.ait.lienzo.client.widget.LienzoPanel;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ScrollEvent;
@@ -44,7 +45,9 @@ public class GridLienzoPanel extends FocusPanel implements RequiresResize,
 
     private final AbsolutePanel internalScrollPanel = new AbsolutePanel();
 
-    private final AbsolutePanel mainPanel = new AbsolutePanel();
+    private final AbsolutePanel scrollPanel = new AbsolutePanel();
+
+    private final AbsolutePanel rootPanel = new AbsolutePanel();
 
     private final GridLienzoScrollHandler gridLienzoScrollHandler;
 
@@ -75,26 +78,38 @@ public class GridLienzoPanel extends FocusPanel implements RequiresResize,
             }
         });
 
-        domElementContainer.setPixelSize(width,
-                                         height);
+        updatePanelSize(width,
+                        height);
     }
 
     private GridLienzoPanel(final LienzoPanel lienzoPanel) {
         this.lienzoPanel = lienzoPanel;
         this.gridLienzoScrollHandler = new GridLienzoScrollHandler(this);
 
-        setupMainPanel();
+        setupPanels();
         setupScrollHandlers();
         setupDefaultHandlers();
     }
 
-    void setupMainPanel() {
+    void setupPanels() {
+        setupScrollPanel();
+        setupDomElementContainer();
+        setupRootPanel();
+
+        add(getRootPanel());
+    }
+
+    void setupScrollPanel() {
+        getScrollPanel().add(getInternalScrollPanel());
+    }
+
+    void setupDomElementContainer() {
         getDomElementContainer().add(getLienzoPanel());
+    }
 
-        getMainPanel().add(getInternalScrollPanel());
-        getMainPanel().add(getDomElementContainer());
-
-        add(getMainPanel());
+    void setupRootPanel() {
+        getRootPanel().add(getDomElementContainer());
+        getRootPanel().add(getScrollPanel());
     }
 
     void setupScrollHandlers() {
@@ -142,21 +157,40 @@ public class GridLienzoPanel extends FocusPanel implements RequiresResize,
 
     @Override
     public void updatePanelSize() {
-        final Element e = getElement().getParentElement();
-        final int width = e.getOffsetWidth();
-        final int height = e.getOffsetHeight();
+        final Element parentElement = getElement().getParentElement();
+        final Integer width = parentElement.getOffsetWidth();
+        final Integer height = parentElement.getOffsetHeight();
 
         if (width > 0 && height > 0) {
-            final Integer scrollbarWidth = getGridLienzoScrollHandler().scrollbarWidth();
-            final Integer scrollbarHeight = getGridLienzoScrollHandler().scrollbarHeight();
-
-            getDomElementContainer().setPixelSize(width - scrollbarWidth,
-                                                  height - scrollbarHeight);
-            getLienzoPanel().setPixelSize(width - scrollbarWidth,
-                                          height - scrollbarHeight);
-            getMainPanel().setPixelSize(width,
-                                        height);
+            updatePanelSize(width,
+                            height);
         }
+    }
+
+    @Override
+    public void updatePanelSize(final Integer width,
+                                final Integer height) {
+        updateScrollPanelSize(width,
+                              height);
+        updateInternalPanelsSizes(width,
+                                  height);
+    }
+
+    private void updateInternalPanelsSizes(final int width,
+                                           final int height) {
+        final Integer scrollbarWidth = getGridLienzoScrollHandler().scrollbarWidth();
+        final Integer scrollbarHeight = getGridLienzoScrollHandler().scrollbarHeight();
+
+        getDomElementContainer().setPixelSize(width - scrollbarWidth,
+                                              height - scrollbarHeight);
+        getLienzoPanel().setPixelSize(width - scrollbarWidth,
+                                      height - scrollbarHeight);
+    }
+
+    private void updateScrollPanelSize(final int width,
+                                       final int height) {
+        getScrollPanel().setPixelSize(width,
+                                      height);
     }
 
     @Override
@@ -194,8 +228,8 @@ public class GridLienzoPanel extends FocusPanel implements RequiresResize,
         return lienzoPanel;
     }
 
-    public AbsolutePanel getMainPanel() {
-        return mainPanel;
+    public AbsolutePanel getScrollPanel() {
+        return scrollPanel;
     }
 
     public AbsolutePanel getDomElementContainer() {
@@ -208,6 +242,10 @@ public class GridLienzoPanel extends FocusPanel implements RequiresResize,
 
     public DefaultGridLayer getDefaultGridLayer() {
         return defaultGridLayer;
+    }
+
+    AbsolutePanel getRootPanel() {
+        return rootPanel;
     }
 
     GridLienzoScrollHandler getGridLienzoScrollHandler() {
