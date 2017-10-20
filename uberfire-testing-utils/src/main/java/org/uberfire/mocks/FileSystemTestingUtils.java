@@ -71,12 +71,11 @@ public class FileSystemTestingUtils {
                            path.getAbsolutePath());
         final URI newRepo = URI.create(repoPath);
 
-        try{
+        try {
 
             fileSystem = ioService.newFileSystem(newRepo,
-                                                 new HashMap<String, Object>());
-        }
-        catch (FileSystemAlreadyExistsException e){
+                                                 new HashMap<>());
+        } catch (FileSystemAlreadyExistsException ignored) {
 
         }
         if (initRepo) {

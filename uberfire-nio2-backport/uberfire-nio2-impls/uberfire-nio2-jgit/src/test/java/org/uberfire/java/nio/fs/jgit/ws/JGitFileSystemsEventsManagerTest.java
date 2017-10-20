@@ -87,8 +87,8 @@ public class JGitFileSystemsEventsManagerTest {
 
     @Test
     public void shouldNotPublishEventsForANotWatchedFS() {
-        WatchService fsDora = manager.newWatchService("fsDora");
-        WatchService fsBento = manager.newWatchService("fsBento");
+        manager.newWatchService("fsDora");
+        manager.newWatchService("fsBento");
 
         List<WatchEvent<?>> elist = Arrays.asList(mock(WatchEvent.class),
                                                   mock(WatchEvent.class));
@@ -105,8 +105,8 @@ public class JGitFileSystemsEventsManagerTest {
 
     @Test
     public void publishEventsShouldBeWatched() {
-        WatchService fsDoraWS = manager.newWatchService("fsDora");
-        WatchService fsBento = manager.newWatchService("fsBento");
+        manager.newWatchService("fsDora");
+        manager.newWatchService("fsBento");
 
         JGitFileSystemWatchServices fsDoraWServices = manager.getFsWatchServices().get("fsDora");
         JGitFileSystemWatchServices fsBentoWServices = manager.getFsWatchServices().get("fsBento");

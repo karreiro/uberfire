@@ -18,6 +18,7 @@ package org.uberfire.io.impl.cluster;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -43,8 +44,8 @@ public class IOServiceClusterImplTest {
 
         final Path rootPath = mock(Path.class);
 
-        when(mockedFS.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
-        when(mockedFSId.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
+        when(mockedFS.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
+        when(mockedFSId.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
 
         when(rootPath.getFileSystem()).thenReturn(mockedFSId);
         when(rootPath.toUri()).thenReturn(URI.create("jgit://myrepo"));
@@ -144,8 +145,8 @@ public class IOServiceClusterImplTest {
 
     private class TestWrapper extends IOServiceClusterImpl {
 
-        public TestWrapper(final ClusterService clusterService,
-                           final IOServiceLockable service) {
+        TestWrapper(final ClusterService clusterService,
+                    final IOServiceLockable service) {
             this.clusterService = clusterService;
             this.service = service;
         }

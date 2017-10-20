@@ -1043,7 +1043,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
                     hasDotContent = false;
                 }
 
-                final File dotfile = tempDot;
+                final File dotFile = tempDot;
 
                 commit(gPath,
                        buildCommitInfo("{" + toPathImpl(path).getPath() + "}",
@@ -1053,7 +1053,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
                                file);
                            if (hasDotContent) {
                                put(toPathImpl(dot(gPath)).getPath(),
-                                   dotfile);
+                                   dotFile);
                            }
                        }}));
             }
@@ -1508,7 +1508,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
                              target,
                              options);
         } else {
-            final Map<JGitPathImpl, JGitPathImpl> sourceDest = new HashMap<JGitPathImpl, JGitPathImpl>();
+            final Map<JGitPathImpl, JGitPathImpl> sourceDest = new HashMap<>();
             if (sourceResult.getPathType() == DIRECTORY) {
                 sourceDest.putAll(mapDirectoryContent(source,
                                                       target,
@@ -1569,7 +1569,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
     private void copyDirectory(final JGitPathImpl source,
                                final JGitPathImpl target,
                                final CopyOption... options) {
-        final List<JGitPathImpl> directories = new ArrayList<JGitPathImpl>();
+        final List<JGitPathImpl> directories = new ArrayList<>();
         for (final Path path : newDirectoryStream(source,
                                                   null)) {
             final JGitPathImpl gPath = toPathImpl(path);
@@ -1657,7 +1657,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
         if (options == null || options.length == 0) {
             return new OpenOption[0];
         }
-        final List<OpenOption> newOptions = new ArrayList<OpenOption>(options.length);
+        final List<OpenOption> newOptions = new ArrayList<>(options.length);
         for (final CopyOption option : options) {
             if (option instanceof OpenOption) {
                 newOptions.add((OpenOption) option);
@@ -1776,7 +1776,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
                  options);
             delete(source);
         } else {
-            final Map<JGitPathImpl, JGitPathImpl> fromTo = new HashMap<JGitPathImpl, JGitPathImpl>();
+            final Map<JGitPathImpl, JGitPathImpl> fromTo = new HashMap<>();
             if (sourceResult.getPathType() == DIRECTORY) {
                 fromTo.putAll(mapDirectoryContent(source,
                                                   target,
@@ -1821,7 +1821,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
                            final JGitPathImpl target,
                            final Map<JGitPathImpl, JGitPathImpl> fromTo,
                            final CopyOption... options) {
-        final Map<String, String> result = new HashMap<String, String>(fromTo.size());
+        final Map<String, String> result = new HashMap<>(fromTo.size());
         for (final Map.Entry<JGitPathImpl, JGitPathImpl> fromToEntry : fromTo.entrySet()) {
             result.put(PathUtil.normalize(fromToEntry.getKey().getPath()),
                        PathUtil.normalize(fromToEntry.getValue().getPath()));
@@ -1836,7 +1836,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
                            final JGitPathImpl target,
                            final Map<JGitPathImpl, JGitPathImpl> sourceDest,
                            final CopyOption... options) {
-        final Map<String, String> result = new HashMap<String, String>(sourceDest.size());
+        final Map<String, String> result = new HashMap<>(sourceDest.size());
         for (final Map.Entry<JGitPathImpl, JGitPathImpl> sourceDestEntry : sourceDest.entrySet()) {
             result.put(PathUtil.normalize(sourceDestEntry.getKey().getPath()),
                        PathUtil.normalize(sourceDestEntry.getValue().getPath()));

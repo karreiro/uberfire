@@ -37,7 +37,7 @@ import org.uberfire.java.nio.file.WatchService;
 import org.uberfire.java.nio.file.Watchable;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractIOWatchServiceTest {
@@ -128,13 +128,8 @@ public class AbstractIOWatchServiceTest {
             }
             AsyncWatchService asyncWatchService = watchThreads.iterator().next();
 
-            IOWatchServiceExecutor wsExecutor = new IOWatchServiceExecutor() {
-
-                @Override
-                public void execute(WatchKey watchKey,
-                                    Filter<WatchEvent<?>> filter) {
-                    throw new RuntimeException("dummy");
-                }
+            IOWatchServiceExecutor wsExecutor = (watchKey, filter) -> {
+                throw new RuntimeException("dummy");
             };
 
             try {

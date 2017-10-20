@@ -24,13 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Test;
 import org.uberfire.java.nio.base.FileSystemState;
 import org.uberfire.java.nio.file.DirectoryStream;
 import org.uberfire.java.nio.file.FileSystem;
 import org.uberfire.java.nio.file.Path;
-import org.uberfire.java.nio.fs.jgit.util.GitImpl;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -73,11 +71,6 @@ public class JGitFileSystemImplProviderWithFoldersTest extends AbstractTestInfra
 
         assertThat(new File(provider.getGitRepoContainerDir(),
                             "test/old" + ".git").exists()).isTrue();
-
-        int commitsCount = 0;
-        for (RevCommit com : ((GitImpl) fs.getGit())._log().all().call()) {
-            commitsCount++;
-        }
     }
 
     @Test

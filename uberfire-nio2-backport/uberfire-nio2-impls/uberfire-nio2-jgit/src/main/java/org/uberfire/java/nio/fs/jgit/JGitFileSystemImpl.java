@@ -71,14 +71,14 @@ public class JGitFileSystemImpl implements JGitFileSystem {
     private final JGitFileSystemProvider provider;
     private final Git git;
     private final String toStringContent;
-    private boolean isClosed = false;
     private final FileStore fileStore;
     private final String name;
     private final CredentialsProvider credential;
     private final AtomicInteger numberOfCommitsSinceLastGC = new AtomicInteger(0);
+    private boolean isClosed = false;
     private FileSystemState state = FileSystemState.NORMAL;
     private CommitInfo batchCommitInfo = null;
-    private Map<Path, Boolean> hadCommitOnBatchState = new ConcurrentHashMap<Path, Boolean>();
+    private Map<Path, Boolean> hadCommitOnBatchState = new ConcurrentHashMap<>();
     private Map<String, NotificationModel> oldHeadsOfPendingDiffs = new ConcurrentHashMap<>();
     private Lock lock;
     private JGitFileSystemsEventsManager fsEventsManager;
@@ -374,15 +374,6 @@ public class JGitFileSystemImpl implements JGitFileSystem {
     }
 
     @Override
-    public void setState(String state) {
-        try {
-            this.state = FileSystemState.valueOf(state);
-        } catch (final Exception ex) {
-            this.state = FileSystemState.NORMAL;
-        }
-    }
-
-    @Override
     public CommitInfo buildCommitInfo(final String defaultMessage,
                                       final CommentedOption op) {
         String sessionId = null;
@@ -442,13 +433,13 @@ public class JGitFileSystemImpl implements JGitFileSystem {
     }
 
     @Override
-    public void setBatchCommitInfo(CommitInfo batchCommitInfo) {
-        this.batchCommitInfo = batchCommitInfo;
+    public CommitInfo getBatchCommitInfo() {
+        return batchCommitInfo;
     }
 
     @Override
-    public CommitInfo getBatchCommitInfo() {
-        return batchCommitInfo;
+    public void setBatchCommitInfo(CommitInfo batchCommitInfo) {
+        this.batchCommitInfo = batchCommitInfo;
     }
 
     @Override
@@ -472,6 +463,15 @@ public class JGitFileSystemImpl implements JGitFileSystem {
     }
 
     @Override
+    public void setState(String state) {
+        try {
+            this.state = FileSystemState.valueOf(state);
+        } catch (final Exception ex) {
+            this.state = FileSystemState.NORMAL;
+        }
+    }
+
+    @Override
     public void lock() {
         lock.lock();
     }
@@ -484,6 +484,28 @@ public class JGitFileSystemImpl implements JGitFileSystem {
     //testing purposes
     public boolean isLocked() {
         return lock.isLocked();
+    }
+
+    @Override
+    public void addOldHeadsOfPendingDiffs(String branchName,
+                                          NotificationModel notificationModel) {
+        oldHeadsOfPendingDiffs.put(branchName,
+                                   notificationModel);
+    }
+
+    @Override
+    public Map<String, NotificationModel> getOldHeadsOfPendingDiffs() {
+        return oldHeadsOfPendingDiffs;
+    }
+
+    @Override
+    public boolean hasOldHeadsOfPendingDiffs() {
+        return !oldHeadsOfPendingDiffs.isEmpty();
+    }
+
+    @Override
+    public void clearOldHeadsOfPendingDiffs() {
+        oldHeadsOfPendingDiffs = new ConcurrentHashMap<>();
     }
 
     public static class Lock {
@@ -567,27 +589,5 @@ public class JGitFileSystemImpl implements JGitFileSystem {
                              e);
             }
         }
-    }
-
-    @Override
-    public void addOldHeadsOfPendingDiffs(String branchName,
-                                          NotificationModel notificationModel) {
-        oldHeadsOfPendingDiffs.put(branchName,
-                                   notificationModel);
-    }
-
-    @Override
-    public Map<String, NotificationModel> getOldHeadsOfPendingDiffs() {
-        return oldHeadsOfPendingDiffs;
-    }
-
-    @Override
-    public boolean hasOldHeadsOfPendingDiffs() {
-        return !oldHeadsOfPendingDiffs.isEmpty();
-    }
-
-    @Override
-    public void clearOldHeadsOfPendingDiffs() {
-        oldHeadsOfPendingDiffs = new ConcurrentHashMap<>();
     }
 }

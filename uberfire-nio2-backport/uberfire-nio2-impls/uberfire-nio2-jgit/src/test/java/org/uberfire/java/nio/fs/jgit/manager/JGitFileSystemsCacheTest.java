@@ -133,11 +133,6 @@ public class JGitFileSystemsCacheTest {
     }
 
     private Supplier<JGitFileSystem> getSupplierSpy(final JGitFileSystem fs1) {
-        return spy(new Supplier<JGitFileSystem>() {
-            @Override
-            public JGitFileSystem get() {
-                return fs1;
-            }
-        });
+        return spy(() -> fs1);
     }
 }

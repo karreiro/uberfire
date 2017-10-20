@@ -16,6 +16,7 @@
 package org.uberfire.java.nio.fs.jgit.manager;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -56,15 +57,15 @@ public class JGitFileSystemsManagerTest {
         manager = new JGitFileSystemsManager(mock(JGitFileSystemProvider.class),
                                              config);
 
-        manager.newFileSystem(() -> new HashMap<>(),
+        manager.newFileSystem(HashMap::new,
                               () -> mock(Git.class),
-                              () -> fs.getName(),
+                              fs::getName,
                               () -> mock(CredentialsProvider.class),
                               () -> mock(JGitFileSystemsEventsManager.class));
 
-        manager.newFileSystem(() -> new HashMap<>(),
+        manager.newFileSystem(HashMap::new,
                               () -> mock(Git.class),
-                              () -> fs1.getName(),
+                              fs1::getName,
                               () -> mock(CredentialsProvider.class),
                               () -> mock(JGitFileSystemsEventsManager.class));
 
@@ -85,13 +86,13 @@ public class JGitFileSystemsManagerTest {
                                              config);
 
         checkParse("a",
-                   Arrays.asList("a"));
+                   Collections.singletonList("a"));
 
         checkParse("/a",
-                   Arrays.asList("a"));
+                   Collections.singletonList("a"));
 
         checkParse("/a/",
-                   Arrays.asList("a"));
+                   Collections.singletonList("a"));
 
         checkParse("a/b/",
                    Arrays.asList("a",

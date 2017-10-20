@@ -82,11 +82,6 @@ public class JGitFileSystemProxy implements JGitFileSystem {
     }
 
     @Override
-    public void setState(String state) {
-        cachedSupplier.get().setState(state);
-    }
-
-    @Override
     public CommitInfo buildCommitInfo(String defaultMessage,
                                       CommentedOption op) {
         return cachedSupplier.get().buildCommitInfo(defaultMessage,
@@ -118,13 +113,13 @@ public class JGitFileSystemProxy implements JGitFileSystem {
     }
 
     @Override
-    public void setBatchCommitInfo(CommitInfo batchCommitInfo) {
-        cachedSupplier.get().setBatchCommitInfo(batchCommitInfo);
+    public CommitInfo getBatchCommitInfo() {
+        return cachedSupplier.get().getBatchCommitInfo();
     }
 
     @Override
-    public CommitInfo getBatchCommitInfo() {
-        return cachedSupplier.get().getBatchCommitInfo();
+    public void setBatchCommitInfo(CommitInfo batchCommitInfo) {
+        cachedSupplier.get().setBatchCommitInfo(batchCommitInfo);
     }
 
     @Override
@@ -249,6 +244,11 @@ public class JGitFileSystemProxy implements JGitFileSystem {
     @Override
     public FileSystemState getState() {
         return cachedSupplier.get().getState();
+    }
+
+    @Override
+    public void setState(String state) {
+        cachedSupplier.get().setState(state);
     }
 
     public JGitFileSystem getRealJGitFileSystem() {

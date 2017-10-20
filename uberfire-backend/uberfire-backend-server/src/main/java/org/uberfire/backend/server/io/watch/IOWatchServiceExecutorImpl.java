@@ -97,7 +97,7 @@ public class IOWatchServiceExecutorImpl implements IOWatchServiceExecutor {
         WatchContext firstContext = null;
 
         if (events.size() > 1) {
-            final Map<Path, Collection<ResourceChange>> changes = new HashMap<Path, Collection<ResourceChange>>();
+            final Map<Path, Collection<ResourceChange>> changes = new HashMap<>();
             for (final WatchEvent event : events) {
                 if (!filter.doFilter(event)) {
                     if (firstContext == null) {
@@ -107,7 +107,7 @@ public class IOWatchServiceExecutorImpl implements IOWatchServiceExecutor {
                     if (result != null) {
                         if (!changes.containsKey(result.getK1())) {
                             changes.put(result.getK1(),
-                                        new ArrayList<ResourceChange>());
+                                        new ArrayList<>());
                         }
                         changes.get(result.getK1()).add(result.getK2());
                     }

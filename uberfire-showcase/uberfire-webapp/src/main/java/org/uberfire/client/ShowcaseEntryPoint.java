@@ -273,22 +273,9 @@ public class ShowcaseEntryPoint {
         //Sort Perspective Providers so they're always in the same sequence!
         List<PerspectiveActivity> sortedActivities = new ArrayList<>(activities);
         Collections.sort(sortedActivities,
-                         new Comparator<PerspectiveActivity>() {
-
-                             @Override
-                             public int compare(PerspectiveActivity o1,
-                                                PerspectiveActivity o2) {
-                                 return o1.getName().compareTo(o2.getName());
-                             }
-                         });
+                         (o1, o2) -> o1.getName().compareTo(o2.getName()));
 
         return sortedActivities;
-    }
-
-    private Collection<WorkbenchScreenActivity> getScreenActivities() {
-
-        //Get Perspective Providers
-        return activityManager.getActivities(WorkbenchScreenActivity.class);
     }
 
     //Fade out the "Loading application" pop-up
@@ -312,14 +299,11 @@ public class ShowcaseEntryPoint {
     @Produces
     @ApplicationScoped
     public MainBrand createBrandLogo() {
-        return new MainBrand() {
-            @Override
-            public Widget asWidget() {
-                final Image image = new Image(AppResource.INSTANCE.images().ufBrandLogo());
-                image.getElement().setAttribute("height",
-                                                "10");
-                return image;
-            }
+        return () -> {
+            final Image image = new Image(AppResource.INSTANCE.images().ufBrandLogo());
+            image.getElement().setAttribute("height",
+                                            "10");
+            return image;
         };
     }
 

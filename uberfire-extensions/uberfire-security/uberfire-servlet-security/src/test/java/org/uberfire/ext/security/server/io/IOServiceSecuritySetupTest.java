@@ -18,6 +18,7 @@ package org.uberfire.ext.security.server.io;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.jboss.errai.security.shared.api.identity.User;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public class IOServiceSecuritySetupTest {
         final FileSystem fs = mock(FileSystem.class);
         final Path rootPath = mock(Path.class);
 
-        when(fs.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
+        when(fs.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
         when(rootPath.getFileSystem()).thenReturn(fs);
         when(rootPath.toUri()).thenReturn(URI.create("/"));
 
@@ -67,7 +68,7 @@ public class IOServiceSecuritySetupTest {
         final Path rootPath = mock(Path.class);
         when(rootPath.toUri()).thenReturn(URI.create("/"));
 
-        when(fs.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
+        when(fs.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
         when(rootPath.getFileSystem()).thenReturn(fs);
 
         final IOSecurityService service = new IOSecurityService(new MockIOService(),

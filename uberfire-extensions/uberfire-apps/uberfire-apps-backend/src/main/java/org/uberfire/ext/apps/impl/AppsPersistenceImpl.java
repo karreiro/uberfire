@@ -87,7 +87,7 @@ public class AppsPersistenceImpl implements AppsPersistenceAPI {
     }
 
     private Map<String, List<String>> generateTagMap() {
-        Map<String, List<String>> tagsMap = new HashMap<String, List<String>>();
+        Map<String, List<String>> tagsMap = new HashMap<>();
         final Collection<LayoutEditorModel> layoutEditorModels = pluginServices.listLayoutEditor(PluginType.PERSPECTIVE_LAYOUT);
         for (LayoutEditorModel layoutEditorModel : layoutEditorModels) {
             LayoutTemplate layoutTemplate = layoutServices.convertLayoutFromString(layoutEditorModel.getLayoutEditorModel());

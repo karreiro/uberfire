@@ -18,6 +18,7 @@ package org.uberfire.backend.server.security;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import javax.enterprise.inject.Instance;
 
 import org.jboss.errai.security.shared.api.identity.User;
@@ -47,10 +48,11 @@ import static org.mockito.Mockito.*;
 public class IOServiceSecuritySetupTest {
 
     @Mock
-    Instance<AuthenticationService> authenticationManagers;
+    private Instance<AuthenticationService> authenticationManagers;
 
-    AuthorizationManager authorizationManager;
-    IOServiceSecuritySetup setupBean;
+    private AuthorizationManager authorizationManager;
+
+    private IOServiceSecuritySetup setupBean;
 
     @Before
     public void setup() {
@@ -94,8 +96,8 @@ public class IOServiceSecuritySetupTest {
         when(((FileSystemId) mockedFSId).id()).thenReturn("mockFS");
         final Path rootPath = mock(Path.class);
         when(rootPath.toUri()).thenReturn(URI.create("/"));
-        when(mockfs.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
-        when(mockedFSId.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
+        when(mockfs.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
+        when(mockedFSId.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
 
         when(rootPath.getFileSystem()).thenReturn(mockedFSId);
 
@@ -136,8 +138,8 @@ public class IOServiceSecuritySetupTest {
                                            withSettings().extraInterfaces(FileSystemId.class));
         final Path rootPath = mock(Path.class);
         when(rootPath.toUri()).thenReturn(URI.create("/"));
-        when(mockfs.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
-        when(mockedFSId.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
+        when(mockfs.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
+        when(mockedFSId.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
         when(rootPath.getFileSystem()).thenReturn(mockedFSId);
 
         FileSystemUser fileSystemUser = installedAuthenticator.authenticate("fake",

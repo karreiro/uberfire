@@ -91,7 +91,6 @@ public class PluginServicesImpl implements PluginServices {
     private static final Logger logger = LoggerFactory.getLogger(PluginServicesImpl.class);
 
     private static final String MENU_ITEM_DELIMITER = " / ";
-    protected Gson gson;
     @Inject
     @Named("ioStrategy")
     private IOService ioService;
@@ -119,7 +118,6 @@ public class PluginServicesImpl implements PluginServices {
 
     @PostConstruct
     public void init() {
-        this.gson = new GsonBuilder().setPrettyPrinting().create();
         try {
             fileSystem = getIoService().newFileSystem(URI.create("default://system_ou/plugins"),
                                                       new HashMap<String, Object>() {{
@@ -223,7 +221,7 @@ public class PluginServicesImpl implements PluginServices {
 
     @Override
     public Collection<Plugin> listPlugins() {
-        final Collection<Plugin> result = new ArrayList<Plugin>();
+        final Collection<Plugin> result = new ArrayList<>();
 
         if (getIoService().exists(root)) {
             walkFileTree(checkNotNull("root",
@@ -384,7 +382,7 @@ public class PluginServicesImpl implements PluginServices {
     private String createRegistry(final PluginSimpleContent plugin) {
         final Path path = getPluginPath(plugin.getName());
 
-        final String registry = new JSRegistry().convertToJSRegistry(plugin);
+        final String registry = JSRegistry.convertToJSRegistry(plugin);
 
         getIoService().write(path.resolve(plugin.getName() + ".registry.js"),
                              registry);
@@ -407,12 +405,7 @@ public class PluginServicesImpl implements PluginServices {
         try {
             final Path rootPlugin = getPluginPath(pluginName);
             final DirectoryStream<Path> stream = getIoService().newDirectoryStream(getCodeRoot(rootPlugin),
-                                                                                   new DirectoryStream.Filter<Path>() {
-                                                                                       @Override
-                                                                                       public boolean accept(final Path entry) throws IOException {
-                                                                                           return entry.getFileName().toString().endsWith(".code");
-                                                                                       }
-                                                                                   });
+                                                                                   entry -> entry.getFileName().toString().endsWith(".code"));
 
             final Map<CodeType, String> result = new HashMap<CodeType, String>();
 
@@ -435,7 +428,7 @@ public class PluginServicesImpl implements PluginServices {
             final Path rootPlugin = getPluginPath(pluginName);
             final DirectoryStream<Path> stream = getIoService().newDirectoryStream(getMediaRoot(rootPlugin));
 
-            final Set<Media> result = new HashSet<Media>();
+            final Set<Media> result = new HashSet<>();
 
             for (final Path path : stream) {
                 result.add(new Media(getMediaServletURI() + pluginName + "/media/" + path.getFileName(),
@@ -466,7 +459,7 @@ public class PluginServicesImpl implements PluginServices {
 
     private Set<Framework> loadFramework(final String pluginName) {
         try {
-            final Set<Framework> result = new HashSet<Framework>();
+            final Set<Framework> result = new HashSet<>();
             final DirectoryStream<Path> stream = getIoService().newDirectoryStream(getPluginPath(pluginName).resolve("dependencies"));
 
             for (final Path path : stream) {
@@ -601,7 +594,8 @@ public class PluginServicesImpl implements PluginServices {
 
         final org.uberfire.backend.vfs.Path result = convert(newPath.resolve(path.getFileName()));
         final PluginContent pluginContent = getPluginContent(result);
-        String registry = createRegistry(pluginContent);
+
+        createRegistry(pluginContent);
 
         pluginRenamedEvent.fire(new PluginRenamed(oldPluginName,
                                                   pluginContent,
@@ -623,7 +617,6 @@ public class PluginServicesImpl implements PluginServices {
                                               attrs);
 
                                  if (file.getFileName().toString().endsWith(".registry.js") && attrs.isRegularFile()) {
-                                     final org.uberfire.backend.vfs.Path path = convert(file);
                                      getIoService().delete(file);
                                  }
                              } catch (final Exception ex) {

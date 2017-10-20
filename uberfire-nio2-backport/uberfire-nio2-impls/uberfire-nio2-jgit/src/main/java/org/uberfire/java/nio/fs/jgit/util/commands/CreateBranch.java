@@ -22,6 +22,7 @@ public class CreateBranch {
 
     private final GitImpl git;
     private final String source;
+    private final String target;
 
     public CreateBranch(final GitImpl git,
                         final String source,
@@ -30,8 +31,6 @@ public class CreateBranch {
         this.source = source;
         this.target = target;
     }
-
-    private final String target;
 
     public void execute() {
         try {

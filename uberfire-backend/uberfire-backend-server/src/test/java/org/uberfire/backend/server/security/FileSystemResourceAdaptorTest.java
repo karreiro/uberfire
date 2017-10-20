@@ -17,7 +17,7 @@
 package org.uberfire.backend.server.security;
 
 import java.net.URI;
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.uberfire.java.nio.base.FileSystemId;
@@ -38,8 +38,8 @@ public class FileSystemResourceAdaptorTest {
 
         final Path rootPath = mock(Path.class);
 
-        when(mockedFS.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
-        when(mockedFSId.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
+        when(mockedFS.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
+        when(mockedFSId.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
 
         when(rootPath.getFileSystem()).thenReturn(mockedFSId);
         when(rootPath.toUri()).thenReturn(URI.create("jgit://myrepo"));

@@ -53,7 +53,7 @@ import static org.mockito.Mockito.*;
 
 public class IOServiceUnitTestWrapper implements IOService {
 
-    Map<String, String> fileSystem = new HashMap<String, String>();
+    Map<String, String> fileSystem = new HashMap<>();
 
     @Override
     public void dispose() {

@@ -401,7 +401,7 @@ public class BatchTest {
         ioService.write(f11,
                         "f2-u2!");
 
-        //inner batch (samme commit)
+        //inner batch (same commit)
         ioService.startBatch(f11.getFileSystem());
         ioService.write(f11,
                         "f2-u2 - inner batch!");
@@ -451,7 +451,7 @@ public class BatchTest {
         try {
             ioService.endBatch();
             fail();
-        } catch (final Exception e) {
+        } catch (final Exception ignored) {
         }
         assertProperBatchCleanup();
     }
@@ -570,26 +570,22 @@ public class BatchTest {
         ioService.startBatch(fs1);
         System.out.println("After start batch");
 
-        final Runnable runnable = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    System.out.println("Inner starting");
-                    ioService.startBatch(fs1);
-                    System.out.println("Inner after batch");
-                    final OutputStream innerOut = ioService.newOutputStream(init);
-                    for (int i = 0; i < 100; i++) {
-                        innerOut.write(("sss" + i).getBytes());
-                    }
-                    System.out.println("Inner after write");
-                    innerOut.close();
-                    System.out.println("Inner after close");
-                    ioService.endBatch();
-                    System.out.println("Inner after end batch");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+        final Runnable runnable = () -> {
+            try {
+                System.out.println("Inner starting");
+                ioService.startBatch(fs1);
+                System.out.println("Inner after batch");
+                final OutputStream innerOut = ioService.newOutputStream(init);
+                for (int i = 0; i < 100; i++) {
+                    innerOut.write(("sss" + i).getBytes());
                 }
+                System.out.println("Inner after write");
+                innerOut.close();
+                System.out.println("Inner after close");
+                ioService.endBatch();
+                System.out.println("Inner after end batch");
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         };
 
@@ -627,22 +623,18 @@ public class BatchTest {
         ioService.startBatch(fs1);
         System.out.println("After start batch");
 
-        final Runnable runnable = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    System.out.println("Inner starting");
-                    final OutputStream innerOut = ioService.newOutputStream(init);
-                    for (int i = 0; i < 100; i++) {
-                        innerOut.write(("sss" + i).getBytes());
-                    }
-                    System.out.println("Inner after write");
-                    innerOut.close();
-                    System.out.println("Inner after end batch");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+        final Runnable runnable = () -> {
+            try {
+                System.out.println("Inner starting");
+                final OutputStream innerOut = ioService.newOutputStream(init);
+                for (int i = 0; i < 100; i++) {
+                    innerOut.write(("sss" + i).getBytes());
                 }
+                System.out.println("Inner after write");
+                innerOut.close();
+                System.out.println("Inner after end batch");
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         };
 
@@ -677,26 +669,23 @@ public class BatchTest {
         ioService.write(init,
                         "init!");
 
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    System.out.println("Inner starting");
-                    ioService.startBatch(fs1);
-                    System.out.println("Inner after batch");
-                    final OutputStream innerOut = ioService.newOutputStream(init);
-                    for (int i = 0; i < 100; i++) {
-                        ioService.write(init,
-                                        ("sss" + i).getBytes());
-                    }
-                    System.out.println("Inner after write");
-                    innerOut.close();
-                    System.out.println("Inner after close");
-                    ioService.endBatch();
-                    System.out.println("Inner after end batch");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+        final Runnable runnable = () -> {
+            try {
+                System.out.println("Inner starting");
+                ioService.startBatch(fs1);
+                System.out.println("Inner after batch");
+                final OutputStream innerOut = ioService.newOutputStream(init);
+                for (int i = 0; i < 100; i++) {
+                    ioService.write(init,
+                                    ("sss" + i).getBytes());
                 }
+                System.out.println("Inner after write");
+                innerOut.close();
+                System.out.println("Inner after close");
+                ioService.endBatch();
+                System.out.println("Inner after end batch");
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         };
 

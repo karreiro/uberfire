@@ -49,7 +49,6 @@ public class JGitFileSystemImplProviderDiffTest extends AbstractTestInfra {
         final File gitSource = new File(parentFolder,
                                         "repo.git");
         final Git origin = new CreateRepository(gitSource).execute().get();
-        final Repository gitRepo = origin.getRepository();
 
         new Commit(origin,
                    "master",

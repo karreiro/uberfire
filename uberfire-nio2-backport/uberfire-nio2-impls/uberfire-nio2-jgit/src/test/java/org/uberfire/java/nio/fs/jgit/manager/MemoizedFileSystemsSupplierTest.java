@@ -48,7 +48,7 @@ public class MemoizedFileSystemsSupplierTest {
     }
 
     Supplier<DummyObject> getSupplier() {
-        return () -> new DummyObject();
+        return DummyObject::new;
     }
 
     private class DummyObject {

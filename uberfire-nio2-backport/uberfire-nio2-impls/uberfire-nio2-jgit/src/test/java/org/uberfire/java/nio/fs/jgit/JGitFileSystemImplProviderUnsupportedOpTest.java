@@ -45,7 +45,7 @@ public class JGitFileSystemImplProviderUnsupportedOpTest extends AbstractTestInf
             provider.newFileSystem(path,
                                    EMPTY_ENV);
             failBecauseExceptionWasNotThrown(UnsupportedOperationException.class);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -63,7 +63,7 @@ public class JGitFileSystemImplProviderUnsupportedOpTest extends AbstractTestInf
             provider.newFileChannel(path,
                                     options);
             failBecauseExceptionWasNotThrown(UnsupportedOperationException.class);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -82,7 +82,7 @@ public class JGitFileSystemImplProviderUnsupportedOpTest extends AbstractTestInf
                                                 options,
                                                 null);
             failBecauseExceptionWasNotThrown(UnsupportedOperationException.class);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -100,7 +100,7 @@ public class JGitFileSystemImplProviderUnsupportedOpTest extends AbstractTestInf
             provider.createSymbolicLink(link,
                                         path);
             failBecauseExceptionWasNotThrown(UnsupportedOperationException.class);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -118,7 +118,7 @@ public class JGitFileSystemImplProviderUnsupportedOpTest extends AbstractTestInf
             provider.createLink(link,
                                 path);
             failBecauseExceptionWasNotThrown(UnsupportedOperationException.class);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -134,7 +134,7 @@ public class JGitFileSystemImplProviderUnsupportedOpTest extends AbstractTestInf
         try {
             provider.readSymbolicLink(link);
             failBecauseExceptionWasNotThrown(UnsupportedOperationException.class);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 }

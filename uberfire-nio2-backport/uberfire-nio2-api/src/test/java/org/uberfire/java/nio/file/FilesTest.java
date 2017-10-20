@@ -89,13 +89,13 @@ public class FilesTest extends AbstractBaseTest {
     @Test
     public void newByteChannel() throws IOException {
         final SeekableByteChannel sbc = Files.newByteChannel(newTempDir().resolve("file.temp.txt"),
-                                                             new HashSet<OpenOption>());
+                                                             new HashSet<>());
         assertThat(sbc).isNotNull();
         sbc.close();
 
         final SeekableByteChannel sbc2 = Files.newByteChannel(newTempDir().resolve("file.temp2.txt"));
-        assertThat(sbc).isNotNull();
-        sbc.close();
+        assertThat(sbc2).isNotNull();
+        sbc2.close();
     }
 
     @Test(expected = FileAlreadyExistsException.class)
@@ -444,7 +444,7 @@ public class FilesTest extends AbstractBaseTest {
             Files.copy(source,
                        dest);
             fail("source isn't empty");
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
 
         sourceFile.toFile().delete();
@@ -455,7 +455,7 @@ public class FilesTest extends AbstractBaseTest {
             Files.copy(source,
                        dest);
             fail("dest already exists");
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
 
         dest.toFile().delete();
@@ -465,9 +465,8 @@ public class FilesTest extends AbstractBaseTest {
             Files.copy(source,
                        dest);
             fail("source doesn't exists");
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
 
-        } finally {
         }
     }
 
@@ -533,7 +532,7 @@ public class FilesTest extends AbstractBaseTest {
             Files.move(source,
                        dest);
             fail("source isn't empty");
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
 
         sourceFile.toFile().delete();
@@ -544,7 +543,7 @@ public class FilesTest extends AbstractBaseTest {
             Files.move(source,
                        dest);
             fail("dest already exists");
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
 
         dest.toFile().delete();
@@ -554,9 +553,8 @@ public class FilesTest extends AbstractBaseTest {
             Files.move(source,
                        dest);
             fail("source doesn't exists");
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
 
-        } finally {
         }
     }
 
@@ -756,14 +754,14 @@ public class FilesTest extends AbstractBaseTest {
             Files.readAttributes(path,
                                  ":someThing");
             fail("undefined view");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         try {
             Files.readAttributes(path,
                                  "advanced:isRegularFile");
             fail("undefined view");
-        } catch (UnsupportedOperationException ex) {
+        } catch (UnsupportedOperationException ignored) {
         }
     }
 
@@ -1182,11 +1180,11 @@ public class FilesTest extends AbstractBaseTest {
         Files.isRegularFile(null);
     }
 
-    private static interface MyAttrsView extends BasicFileAttributeView {
+    private interface MyAttrsView extends BasicFileAttributeView {
 
     }
 
-    private static interface MyAttrs extends BasicFileAttributes {
+    private interface MyAttrs extends BasicFileAttributes {
 
     }
 }

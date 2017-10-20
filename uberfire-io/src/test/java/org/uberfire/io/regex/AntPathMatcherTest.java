@@ -57,7 +57,7 @@ public class AntPathMatcherTest {
         final URI newRepo = URI.create("git://antpathmatcher");
 
         FileSystems.newFileSystem(newRepo,
-                                  new HashMap<String, Object>());
+                                  new HashMap<>());
     }
 
     @AfterClass
@@ -299,12 +299,12 @@ public class AntPathMatcherTest {
                                  excludes,
                                  URI.create("git://master@antpathmatcher/repo/sss")));
 
-        Assert.assertTrue(filter(Collections.<String>emptyList(),
-                                 Collections.<String>emptyList(),
+        Assert.assertTrue(filter(Collections.emptyList(),
+                                 Collections.emptyList(),
                                  URI.create("file:///Users/home")));
 
-        Assert.assertTrue(filter(Collections.<String>emptyList(),
-                                 Collections.<String>emptyList(),
+        Assert.assertTrue(filter(Collections.emptyList(),
+                                 Collections.emptyList(),
                                  URI.create("git://master@antpathmatcher/repo/sss")));
     }
 }

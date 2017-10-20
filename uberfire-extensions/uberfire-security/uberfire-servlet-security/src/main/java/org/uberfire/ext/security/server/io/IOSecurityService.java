@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -121,33 +122,23 @@ public class IOSecurityService implements IOService {
     @Override
     public Path get(String first,
                     String... more) throws IllegalArgumentException {
-        try {
-            final Path result = service.get(first,
-                                            more);
-            if (!authManager.authorize(toResource(result),
-                                       getUser())) {
-                throw new SecurityException();
-            }
-            return result;
-        } catch (IllegalArgumentException ex) {
-            throw ex;
+        final Path result = service.get(first,
+                                        more);
+        if (!authManager.authorize(toResource(result),
+                                   getUser())) {
+            throw new SecurityException();
         }
+        return result;
     }
 
     @Override
     public Path get(URI uri) throws IllegalArgumentException, FileSystemNotFoundException, SecurityException {
-        try {
-            final Path result = service.get(uri);
-            if (!authManager.authorize(toResource(result),
-                                       getUser())) {
-                throw new SecurityException();
-            }
-            return result;
-        } catch (IllegalArgumentException ex) {
-            throw ex;
-        } catch (FileSystemNotFoundException ex) {
-            throw ex;
+        final Path result = service.get(uri);
+        if (!authManager.authorize(toResource(result),
+                                   getUser())) {
+            throw new SecurityException();
         }
+        return result;
     }
 
     @Override
@@ -173,34 +164,20 @@ public class IOSecurityService implements IOService {
                 throw new SecurityException();
             }
             return result;
-        } catch (IllegalArgumentException ex) {
-            throw ex;
-        } catch (FileSystemNotFoundException ex) {
-            throw ex;
-        } catch (ProviderNotFoundException ex) {
-            throw ex;
         }
     }
 
     @Override
     public FileSystem newFileSystem(URI uri,
                                     Map<String, ?> env) throws IllegalArgumentException, FileSystemAlreadyExistsException, ProviderNotFoundException, IOException, SecurityException {
-        try {
-            final FileSystem fs = service.newFileSystem(uri,
-                                                        env);
-            if (!authManager.authorize(toResource(fs),
-                                       getUser())) {
-                service.delete(fs.getPath(null));
-                throw new SecurityException();
-            }
-            return fs;
-        } catch (IllegalArgumentException ex) {
-            throw ex;
-        } catch (FileSystemNotFoundException ex) {
-            throw ex;
-        } catch (ProviderNotFoundException ex) {
-            throw ex;
+        final FileSystem fs = service.newFileSystem(uri,
+                                                    env);
+        if (!authManager.authorize(toResource(fs),
+                                   getUser())) {
+            service.delete(fs.getPath(null));
+            throw new SecurityException();
         }
+        return fs;
     }
 
     @Override
@@ -820,7 +797,7 @@ public class IOSecurityService implements IOService {
             return authenticationService.getUser();
         } catch (final IllegalStateException ex) {
             return new UserImpl("system",
-                                asList(new RoleImpl("admin")));
+                                Collections.singletonList(new RoleImpl("admin")));
         }
     }
 }

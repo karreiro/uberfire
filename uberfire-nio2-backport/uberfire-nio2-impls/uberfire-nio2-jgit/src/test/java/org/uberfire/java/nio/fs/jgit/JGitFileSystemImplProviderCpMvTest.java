@@ -35,6 +35,11 @@ import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrow
 
 public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
 
+    static String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+
     @Test
     public void testCopyBranches() throws IOException {
         final URI newRepo = URI.create("git://copybranch-test-repo");
@@ -79,7 +84,7 @@ public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
             provider.copy(source,
                           target);
             failBecauseExceptionWasNotThrown(FileAlreadyExistsException.class);
-        } catch (FileAlreadyExistsException e) {
+        } catch (FileAlreadyExistsException ignored) {
         }
 
         final Path notExists = provider.getPath(URI.create("git://xxx_user_branch@copybranch-test-repo"));
@@ -89,7 +94,7 @@ public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
             provider.copy(notExists,
                           notExists2);
             failBecauseExceptionWasNotThrown(NoSuchFileException.class);
-        } catch (NoSuchFileException e) {
+        } catch (NoSuchFileException ignored) {
         }
     }
 
@@ -218,7 +223,7 @@ public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
                 provider.copy(source,
                               target);
                 failBecauseExceptionWasNotThrown(NoSuchFileException.class);
-            } catch (NoSuchFileException e) {
+            } catch (NoSuchFileException ignored) {
             }
         }
 
@@ -230,7 +235,7 @@ public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
                 provider.copy(source,
                               target);
                 failBecauseExceptionWasNotThrown(FileAlreadyExistsException.class);
-            } catch (FileAlreadyExistsException e) {
+            } catch (FileAlreadyExistsException ignored) {
             }
         }
     }
@@ -343,7 +348,7 @@ public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
                 provider.copy(source,
                               target);
                 failBecauseExceptionWasNotThrown(NoSuchFileException.class);
-            } catch (NoSuchFileException e) {
+            } catch (NoSuchFileException ignored) {
             }
         }
 
@@ -355,7 +360,7 @@ public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
                 provider.copy(source,
                               target);
                 failBecauseExceptionWasNotThrown(FileAlreadyExistsException.class);
-            } catch (FileAlreadyExistsException e) {
+            } catch (FileAlreadyExistsException ignored) {
             }
         }
     }
@@ -396,7 +401,7 @@ public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
             provider.move(source,
                           target);
             failBecauseExceptionWasNotThrown(FileAlreadyExistsException.class);
-        } catch (org.uberfire.java.nio.IOException e) {
+        } catch (org.uberfire.java.nio.IOException ignored) {
         }
 
         final Path source2 = provider.getPath(URI.create("git://user_branch@movebranch-test-repo/"));
@@ -576,10 +581,5 @@ public class JGitFileSystemImplProviderCpMvTest extends AbstractTestInfra {
             final String result = convertStreamToString(provider.newInputStream(provider.getPath(URI.create("git://other_branch2@cherrypick-test-repo/myfile1.txt"))));
             assertThat(result).isEqualTo(cherryPickContent2);
         }
-    }
-
-    static String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
     }
 }

@@ -35,7 +35,7 @@ public class JGitFileSystemImplProviderGCTest extends AbstractTestInfra {
         final URI newRepo = URI.create("git://gc-repo-name");
 
         final JGitFileSystem fs = (JGitFileSystem) provider.newFileSystem(newRepo,
-                                                                                  EMPTY_ENV);
+                                                                          EMPTY_ENV);
 
         assertThat(fs).isNotNull();
 
@@ -47,7 +47,7 @@ public class JGitFileSystemImplProviderGCTest extends AbstractTestInfra {
             provider.newFileSystem(newRepo,
                                    EMPTY_ENV);
             failBecauseExceptionWasNotThrown(FileSystemAlreadyExistsException.class);
-        } catch (final Exception ex) {
+        } catch (final Exception ignored) {
         }
 
         for (int i = 0; i < 19; i++) {

@@ -17,7 +17,7 @@
 package org.uberfire.io.impl.cluster;
 
 import java.net.URI;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
@@ -39,9 +39,8 @@ public class FileSystemSyncTest {
 
         final Path rootPath = mock(Path.class);
 
-
-        when(mockedFS.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
-        when(mockedFSId.getRootDirectories()).thenReturn(Arrays.asList(rootPath));
+        when(mockedFS.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
+        when(mockedFSId.getRootDirectories()).thenReturn(Collections.singletonList(rootPath));
 
         when(rootPath.getFileSystem()).thenReturn(mockedFSId);
         when(rootPath.toUri()).thenReturn(URI.create("jgit://myrepo"));
@@ -49,16 +48,16 @@ public class FileSystemSyncTest {
         when(((FileSystemId) mockedFSId).id()).thenReturn("my-fsid");
 
         {
-            final FileSystemSyncLock<String> fileSystemSyncLock = new FileSystemSyncLock<String>("serviceId",
-                                                                                                 new FileSystemMetadata(mockedFSId));
+            final FileSystemSyncLock<String> fileSystemSyncLock = new FileSystemSyncLock<>("serviceId",
+                                                                                           new FileSystemMetadata(mockedFSId));
             final Map<String, String> content = fileSystemSyncLock.buildContent();
 
             assertEquals("my-fsid",
                          content.get("fs_id"));
         }
         {
-            final FileSystemSyncNonLock<String> fileSystemSyncNonLock = new FileSystemSyncNonLock<String>("serviceId",
-                                                                                                          new FileSystemMetadata(mockedFSId));
+            final FileSystemSyncNonLock<String> fileSystemSyncNonLock = new FileSystemSyncNonLock<>("serviceId",
+                                                                                                    new FileSystemMetadata(mockedFSId));
             final Map<String, String> content = fileSystemSyncNonLock.buildContent();
 
             assertEquals("my-fsid",

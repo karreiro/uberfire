@@ -41,9 +41,8 @@ import org.uberfire.java.nio.file.WatchEvent;
 
 public class JGitEventsBroadcast {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JGitEventsBroadcast.class);
     public static final String DEFAULT_APPFORMER_TOPIC = "default-appformer-topic";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(JGitEventsBroadcast.class);
     private Session session;
     private String nodeId = UUID.randomUUID().toString();
     private ClusterParameters clusterParameters;
@@ -91,7 +90,7 @@ public class JGitEventsBroadcast {
             Destination topic = session.createTopic(topicName);
             MessageProducer messageProducer = session.createProducer(topic);
             MessageConsumer consumer = session.createConsumer(topic);
-            consumer.setMessageListener(message -> messageListener(message));
+            consumer.setMessageListener(this::messageListener);
             return Optional.of(new TopicConsumerProducerWrapper(messageProducer,
                                                                 consumer));
         } catch (JMSException e) {
@@ -131,7 +130,7 @@ public class JGitEventsBroadcast {
 
         try {
             MessageProducer messageProducer = register(fsName)
-                    .map(opt -> opt.getMessageProducer())
+                    .map(TopicConsumerProducerWrapper::getMessageProducer)
                     .orElse(defaultTopic.getMessageProducer());
 
             WatchEventsWrapper serializable = new WatchEventsWrapper(nodeId,
@@ -152,7 +151,7 @@ public class JGitEventsBroadcast {
             String topicName = fsName.substring(0,
                                                 fsName.indexOf("/"));
             Optional<TopicConsumerProducerWrapper> topicConsumerProducerWrapper = topics.computeIfAbsent(topicName,
-                                                                                                         t -> createTopicConsumerProducerWrapper(t));
+                                                                                                         this::createTopicConsumerProducerWrapper);
             return topicConsumerProducerWrapper;
         }
         return Optional.empty();

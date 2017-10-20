@@ -28,10 +28,9 @@ import org.uberfire.java.nio.file.WatchService;
 
 public class JGitWatchService implements WatchService {
 
-    private boolean wsClose = false;
-
     private final Queue<WatchKey> events = new ConcurrentLinkedQueue<>();
     private final String fsName;
+    private boolean wsClose = false;
     private Consumer<JGitWatchService> notifyClose;
 
     public JGitWatchService(String fsName,
@@ -62,7 +61,7 @@ public class JGitWatchService implements WatchService {
             } else {
                 try {
                     this.wait();
-                } catch (final java.lang.InterruptedException e) {
+                } catch (final java.lang.InterruptedException ignored) {
                 }
             }
         }

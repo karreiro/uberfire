@@ -28,12 +28,12 @@ public class FileSystemResourceAdaptor implements RuntimeContentResource {
     private final String identifier;
     private FileSystemMetadata fileSystemMetadata;
 
-    public FileSystemResourceAdaptor(final FileSystemMetadata fsfileSystemMetadata) {
-        this.fileSystemMetadata = fsfileSystemMetadata;
-        if (fsfileSystemMetadata.IsAFileSystemID()) {
-            identifier = fsfileSystemMetadata.getId();
+    public FileSystemResourceAdaptor(final FileSystemMetadata fsFileSystemMetadata) {
+        this.fileSystemMetadata = fsFileSystemMetadata;
+        if (fsFileSystemMetadata.IsAFileSystemID()) {
+            identifier = fsFileSystemMetadata.getId();
         } else {
-            identifier = fsfileSystemMetadata.getUri();
+            identifier = fsFileSystemMetadata.getUri();
         }
     }
 

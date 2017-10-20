@@ -27,11 +27,7 @@ import org.apache.sshd.server.SshServer;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.junit.Assume;
 import org.junit.Test;
-import org.uberfire.java.nio.file.FileSystem;
 import org.uberfire.java.nio.fs.jgit.util.commands.Commit;
-import org.uberfire.java.nio.security.FileSystemAuthenticator;
-import org.uberfire.java.nio.security.FileSystemAuthorizer;
-import org.uberfire.java.nio.security.FileSystemUser;
 
 import static org.junit.Assert.*;
 
@@ -59,25 +55,8 @@ public class JGitFileSystemImplProviderSSHTest extends AbstractTestInfra {
         Assume.assumeFalse("UF-511",
                            System.getProperty("java.vendor").equals("IBM Corporation"));
         //Setup Authorization/Authentication
-        provider.setAuthenticator(new FileSystemAuthenticator() {
-            @Override
-            public FileSystemUser authenticate(final String username,
-                                               final String password) {
-                return new FileSystemUser() {
-                    @Override
-                    public String getName() {
-                        return "admin";
-                    }
-                };
-            }
-        });
-        provider.setAuthorizer(new FileSystemAuthorizer() {
-            @Override
-            public boolean authorize(final FileSystem fs,
-                                     final FileSystemUser fileSystemUser) {
-                return true;
-            }
-        });
+        provider.setAuthenticator((username, password) -> () -> "admin");
+        provider.setAuthorizer((fs, fileSystemUser) -> true);
 
         CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider("admin",
                                                                                ""));
@@ -87,7 +66,7 @@ public class JGitFileSystemImplProviderSSHTest extends AbstractTestInfra {
         //Setup origin
         final URI originRepo = URI.create("git://repo");
         final JGitFileSystem origin = (JGitFileSystem) provider.newFileSystem(originRepo,
-                                                                                      Collections.emptyMap());
+                                                                              Collections.emptyMap());
 
         //Write a file to origin that we won't amend in the clone
         new Commit(origin.getGit(),
@@ -106,7 +85,7 @@ public class JGitFileSystemImplProviderSSHTest extends AbstractTestInfra {
         //Setup clone
         JGitFileSystem clone;
         clone = (JGitFileSystem) provider.newFileSystem(URI.create("git://repo-clone"),
-                                                            new HashMap<String, Object>() {{
+                                                        new HashMap<String, Object>() {{
                                                             put("init",
                                                                 "true");
                                                             put("origin",

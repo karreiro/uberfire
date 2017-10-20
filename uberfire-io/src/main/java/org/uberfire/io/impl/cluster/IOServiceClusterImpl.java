@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
@@ -90,9 +89,9 @@ public class IOServiceClusterImpl implements IOService {
 
     private static final Logger logger = LoggerFactory.getLogger(IOServiceClusterImpl.class);
     protected final Set<String> batchFileSystems = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private ExecutorService executorService;
     protected IOServiceLockable service;
     protected ClusterService clusterService;
+    private ExecutorService executorService;
     private NewFileSystemListener newFileSystemListener = null;
 
     IOServiceClusterImpl() {
@@ -161,89 +160,86 @@ public class IOServiceClusterImpl implements IOService {
                      this);
         //New cluster members are executed within locked
         new LockExecuteReleaseTemplate<Void>().execute(clusterService,
-                                                       new FutureTask<Void>(new Callable<Void>() {
-                                                           @Override
-                                                           public Void call() throws Exception {
+                                                       new FutureTask<>(() -> {
 
-                                                               // 10 seconds
-                                                               int timeout = 10000;
-                                                               final AtomicBoolean msgAnsweredOrTimedout = new AtomicBoolean(false);
-                                                               final AtomicBoolean onSync = new AtomicBoolean(false);
+                                                           // 10 seconds
+                                                           int timeout = 10000;
+                                                           final AtomicBoolean msgAnsweredOrTimedout = new AtomicBoolean(false);
+                                                           final AtomicBoolean onSync = new AtomicBoolean(false);
 
-                                                               final Map<Integer, FileSystemInfo> fileSystems = new HashMap<Integer, FileSystemInfo>();
+                                                           final Map<Integer, FileSystemInfo> fileSystems = new HashMap<>();
 
-                                                               clusterService.broadcastAndWait(service.getId(),
-                                                                                               QUERY_FOR_FS,
-                                                                                               Collections.<String, String>emptyMap(),
-                                                                                               timeout,
-                                                                                               new AsyncCallback() {
-                                                                                                   @Override
-                                                                                                   public void onTimeOut() {
-                                                                                                       msgAnsweredOrTimedout.set(true);
+                                                           clusterService.broadcastAndWait(service.getId(),
+                                                                                           QUERY_FOR_FS,
+                                                                                           Collections.emptyMap(),
+                                                                                           timeout,
+                                                                                           new AsyncCallback() {
+                                                                                               @Override
+                                                                                               public void onTimeOut() {
+                                                                                                   msgAnsweredOrTimedout.set(true);
+                                                                                               }
+
+                                                                                               @Override
+                                                                                               public void onReply(final MessageType type,
+                                                                                                                   final Map<String, String> content) {
+                                                                                                   if (msgAnsweredOrTimedout.get() || onSync.get()) {
+                                                                                                       return;
                                                                                                    }
 
-                                                                                                   @Override
-                                                                                                   public void onReply(final MessageType type,
-                                                                                                                       final Map<String, String> content) {
-                                                                                                       if (msgAnsweredOrTimedout.get() || onSync.get()) {
-                                                                                                           return;
+                                                                                                   onSync.set(true);
+
+                                                                                                   executorService.execute(new DescriptiveRunnable() {
+                                                                                                       @Override
+                                                                                                       public String getDescription() {
+                                                                                                           return "Cluster Messaging Reply [" + service.getId() + "/QUERY_FOR_FS]";
                                                                                                        }
 
-                                                                                                       onSync.set(true);
-
-                                                                                                       executorService.execute(new DescriptiveRunnable() {
-                                                                                                           @Override
-                                                                                                           public String getDescription() {
-                                                                                                               return "Cluster Messaging Reply [" + service.getId() + "/QUERY_FOR_FS]";
-                                                                                                           }
-
-                                                                                                           @Override
-                                                                                                           public void run() {
-                                                                                                               for (final Map.Entry<String, String> entry : content.entrySet()) {
-                                                                                                                   if (entry.getKey().startsWith("fs_")) {
-                                                                                                                       int index = Integer.valueOf(entry.getKey().substring(entry.getKey().lastIndexOf("_") + 1));
-                                                                                                                       if (!fileSystems.containsKey(index)) {
-                                                                                                                           fileSystems.put(index,
-                                                                                                                                           new FileSystemInfo());
-                                                                                                                       }
-                                                                                                                       final FileSystemInfo fsInfo = fileSystems.get(index);
-                                                                                                                       if (entry.getKey().startsWith("fs_id_")) {
-                                                                                                                           fsInfo.setId(entry.getValue());
-                                                                                                                       } else if (entry.getKey().startsWith("fs_scheme_")) {
-                                                                                                                           fsInfo.setScheme(entry.getValue());
-                                                                                                                       } else if (entry.getKey().startsWith("fs_uri_")) {
-                                                                                                                           fsInfo.setUri(entry.getValue());
-                                                                                                                       }
+                                                                                                       @Override
+                                                                                                       public void run() {
+                                                                                                           for (final Map.Entry<String, String> entry : content.entrySet()) {
+                                                                                                               if (entry.getKey().startsWith("fs_")) {
+                                                                                                                   int index = Integer.valueOf(entry.getKey().substring(entry.getKey().lastIndexOf("_") + 1));
+                                                                                                                   if (!fileSystems.containsKey(index)) {
+                                                                                                                       fileSystems.put(index,
+                                                                                                                                       new FileSystemInfo());
+                                                                                                                   }
+                                                                                                                   final FileSystemInfo fsInfo = fileSystems.get(index);
+                                                                                                                   if (entry.getKey().startsWith("fs_id_")) {
+                                                                                                                       fsInfo.setId(entry.getValue());
+                                                                                                                   } else if (entry.getKey().startsWith("fs_scheme_")) {
+                                                                                                                       fsInfo.setScheme(entry.getValue());
+                                                                                                                   } else if (entry.getKey().startsWith("fs_uri_")) {
+                                                                                                                       fsInfo.setUri(entry.getValue());
                                                                                                                    }
                                                                                                                }
+                                                                                                           }
 
-                                                                                                               for (final FileSystemInfo fileSystemInfo : new HashSet<FileSystemInfo>(fileSystems.values())) {
-                                                                                                                   try {
-                                                                                                                       final URI newFS = URI.create(fileSystemInfo.getScheme() + "://" + fileSystemInfo.getId());
-                                                                                                                       service.newFileSystem(newFS,
-                                                                                                                                             Collections.<String, Object>emptyMap());
-                                                                                                                   } catch (FileSystemAlreadyExistsException ex) {
-                                                                                                                   }
-
-                                                                                                                   final URI fs = URI.create(fileSystemInfo.getScheme() + "://" + fileSystemInfo.getId() + "?sync=" + fileSystemInfo.getUri().split("\n")[0] + "&force");
-                                                                                                                   service.getFileSystem(fs);
+                                                                                                           for (final FileSystemInfo fileSystemInfo : new HashSet<>(fileSystems.values())) {
+                                                                                                               try {
+                                                                                                                   final URI newFS = URI.create(fileSystemInfo.getScheme() + "://" + fileSystemInfo.getId());
+                                                                                                                   service.newFileSystem(newFS,
+                                                                                                                                         Collections.emptyMap());
+                                                                                                               } catch (FileSystemAlreadyExistsException ex) {
                                                                                                                }
 
-                                                                                                               msgAnsweredOrTimedout.set(true);
+                                                                                                               final URI fs = URI.create(fileSystemInfo.getScheme() + "://" + fileSystemInfo.getId() + "?sync=" + fileSystemInfo.getUri().split("\n")[0] + "&force");
+                                                                                                               service.getFileSystem(fs);
                                                                                                            }
-                                                                                                       });
-                                                                                                   }
-                                                                                               });
 
-                                                               while (!msgAnsweredOrTimedout.get()) {
-                                                                   try {
-                                                                       Thread.sleep(100);
-                                                                   } catch (InterruptedException ignored) {
-                                                                   }
+                                                                                                           msgAnsweredOrTimedout.set(true);
+                                                                                                       }
+                                                                                                   });
+                                                                                               }
+                                                                                           });
+
+                                                           while (!msgAnsweredOrTimedout.get()) {
+                                                               try {
+                                                                   Thread.sleep(100);
+                                                               } catch (InterruptedException ignored) {
                                                                }
-
-                                                               return null;
                                                            }
+
+                                                           return null;
                                                        }));
     }
 
@@ -282,14 +278,11 @@ public class IOServiceClusterImpl implements IOService {
                     try {
                         new FileSystemSyncNonLock<Void>(service.getId(),
                                                         fsInfo).execute(clusterService,
-                                                                        new FutureTask<Void>(new Callable<Void>() {
-                                                                            @Override
-                                                                            public Void call() throws Exception {
-                                                                                if (process.decrementAndGet() == 0) {
-                                                                                    clusterService.unlock();
-                                                                                }
-                                                                                return null;
+                                                                        new FutureTask<>(() -> {
+                                                                            if (process.decrementAndGet() == 0) {
+                                                                                clusterService.unlock();
                                                                             }
+                                                                            return null;
                                                                         }));
                     } catch (Exception ex) {
                         logger.error("End batch error",
@@ -370,16 +363,11 @@ public class IOServiceClusterImpl implements IOService {
                 return TIMEOUT;
             }
         }.execute(clusterService,
-                  new FutureTask<FileSystem>(new Callable<FileSystem>() {
-                      @Override
-                      public FileSystem call() throws Exception {
-                          return service.newFileSystem(uri,
-                                                       new HashMap<String, Object>(env) {{
-                                                           put("clusterService",
-                                                               clusterService);
-                                                       }});
-                      }
-                  }));
+                  new FutureTask<>(() -> service.newFileSystem(uri,
+                                                               new HashMap<String, Object>(env) {{
+                                                                   put("clusterService",
+                                                                       clusterService);
+                                                               }})));
     }
 
     @Override
@@ -416,13 +404,8 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.createFile(path,
-                                                                                                                                       attrs);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.createFile(path,
+                                                                                                                                            attrs)));
     }
 
     @Override
@@ -435,13 +418,8 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(dir.getFileSystem())).execute(clusterService,
-                                                                                                 new FutureTask<Path>(new Callable<Path>() {
-                                                                                                        @Override
-                                                                                                        public Path call() throws Exception {
-                                                                                                            return service.createDirectory(dir,
-                                                                                                                                           attrs);
-                                                                                                        }
-                                                                                                    }));
+                                                                                                 new FutureTask<>(() -> service.createDirectory(dir,
+                                                                                                                                                attrs)));
     }
 
     @Override
@@ -454,13 +432,8 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(dir.getFileSystem())).execute(clusterService,
-                                                                                                 new FutureTask<Path>(new Callable<Path>() {
-                                                                                                        @Override
-                                                                                                        public Path call() throws Exception {
-                                                                                                            return service.createDirectories(dir,
-                                                                                                                                             attrs);
-                                                                                                        }
-                                                                                                    }));
+                                                                                                 new FutureTask<>(() -> service.createDirectories(dir,
+                                                                                                                                                  attrs)));
     }
 
     @Override
@@ -473,13 +446,8 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(dir.getFileSystem())).execute(clusterService,
-                                                                                                 new FutureTask<Path>(new Callable<Path>() {
-                                                                                                        @Override
-                                                                                                        public Path call() throws Exception {
-                                                                                                            return service.createDirectory(dir,
-                                                                                                                                           attrs);
-                                                                                                        }
-                                                                                                    }));
+                                                                                                 new FutureTask<>(() -> service.createDirectory(dir,
+                                                                                                                                                attrs)));
     }
 
     @Override
@@ -492,13 +460,8 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(dir.getFileSystem())).execute(clusterService,
-                                                                                                 new FutureTask<Path>(new Callable<Path>() {
-                                                                                                        @Override
-                                                                                                        public Path call() throws Exception {
-                                                                                                            return service.createDirectories(dir,
-                                                                                                                                             attrs);
-                                                                                                        }
-                                                                                                    }));
+                                                                                                 new FutureTask<>(() -> service.createDirectories(dir,
+                                                                                                                                                  attrs)));
     }
 
     @Override
@@ -510,14 +473,11 @@ public class IOServiceClusterImpl implements IOService {
         } else {
             new FileSystemSyncLock<Void>(service.getId(),
                                          new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                               new FutureTask<Void>(new Callable<Void>() {
-                                                                                                      @Override
-                                                                                                      public Void call() throws Exception {
-                                                                                                          service.delete(path,
-                                                                                                                         options);
-                                                                                                          return null;
-                                                                                                      }
-                                                                                                  }));
+                                                                                               new FutureTask<>(() -> {
+                                                                                                   service.delete(path,
+                                                                                                                  options);
+                                                                                                   return null;
+                                                                                               }));
         }
     }
 
@@ -530,13 +490,8 @@ public class IOServiceClusterImpl implements IOService {
         }
         return new FileSystemSyncLock<Boolean>(service.getId(),
                                                new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                     new FutureTask<Boolean>(new Callable<Boolean>() {
-                                                                                                            @Override
-                                                                                                            public Boolean call() throws Exception {
-                                                                                                                return service.deleteIfExists(path,
-                                                                                                                                              options);
-                                                                                                            }
-                                                                                                        }));
+                                                                                                     new FutureTask<>(() -> service.deleteIfExists(path,
+                                                                                                                                                   options)));
     }
 
     @Override
@@ -587,14 +542,9 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(target.getFileSystem())).execute(clusterService,
-                                                                                                    new FutureTask<Path>(new Callable<Path>() {
-                                                                                                           @Override
-                                                                                                           public Path call() throws Exception {
-                                                                                                               return service.copy(source,
-                                                                                                                                   target,
-                                                                                                                                   options);
-                                                                                                           }
-                                                                                                       }));
+                                                                                                    new FutureTask<>(() -> service.copy(source,
+                                                                                                                                        target,
+                                                                                                                                        options)));
     }
 
     @Override
@@ -609,14 +559,9 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Long>(service.getId(),
                                             new FileSystemMetadata(target.getFileSystem())).execute(clusterService,
-                                                                                                    new FutureTask<Long>(new Callable<Long>() {
-                                                                                                           @Override
-                                                                                                           public Long call() throws Exception {
-                                                                                                               return service.copy(in,
-                                                                                                                                   target,
-                                                                                                                                   options);
-                                                                                                           }
-                                                                                                       }));
+                                                                                                    new FutureTask<>(() -> service.copy(in,
+                                                                                                                                        target,
+                                                                                                                                        options)));
     }
 
     @Override
@@ -638,21 +583,11 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(source.getFileSystem())).execute(clusterService,
-                                                                                                    new FutureTask<Path>(new Callable<Path>() {
-                                                                                                           @Override
-                                                                                                           public Path call() throws Exception {
-                                                                                                               return new FileSystemSyncLock<Path>(service.getId(),
-                                                                                                                                                   new FileSystemMetadata(target.getFileSystem())).execute(clusterService,
-                                                                                                                                                                                                           new FutureTask<Path>(new Callable<Path>() {
-                                                                                                                                                                                                                  @Override
-                                                                                                                                                                                                                  public Path call() throws Exception {
-                                                                                                                                                                                                                      return service.move(source,
-                                                                                                                                                                                                                                          target,
-                                                                                                                                                                                                                                          options);
-                                                                                                                                                                                                                  }
-                                                                                                                                                                                                              }));
-                                                                                                           }
-                                                                                                       }));
+                                                                                                    new FutureTask<>(() -> new FileSystemSyncLock<Path>(service.getId(),
+                                                                                                                                                        new FileSystemMetadata(target.getFileSystem())).execute(clusterService,
+                                                                                                                                                                                                                new FutureTask<>(() -> service.move(source,
+                                                                                                                                                                                                                                                    target,
+                                                                                                                                                                                                                                                    options)))));
     }
 
     @Override
@@ -684,13 +619,8 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.setAttributes(path,
-                                                                                                                                          attrs);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.setAttributes(path,
+                                                                                                                                               attrs)));
     }
 
     @Override
@@ -703,13 +633,8 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.setAttributes(path,
-                                                                                                                                          attrs);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.setAttributes(path,
+                                                                                                                                               attrs)));
     }
 
     @Override
@@ -724,14 +649,9 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.setAttribute(path,
-                                                                                                                                         attribute,
-                                                                                                                                         value);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.setAttribute(path,
+                                                                                                                                              attribute,
+                                                                                                                                              value)));
     }
 
     @Override
@@ -816,14 +736,9 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  bytes,
-                                                                                                                                  options);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       bytes,
+                                                                                                                                       options)));
     }
 
     @Override
@@ -840,15 +755,10 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  bytes,
-                                                                                                                                  attrs,
-                                                                                                                                  options);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       bytes,
+                                                                                                                                       attrs,
+                                                                                                                                       options)));
     }
 
     @Override
@@ -865,15 +775,10 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  bytes,
-                                                                                                                                  options,
-                                                                                                                                  attrs);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       bytes,
+                                                                                                                                       options,
+                                                                                                                                       attrs)));
     }
 
     @Override
@@ -890,15 +795,10 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  lines,
-                                                                                                                                  cs,
-                                                                                                                                  options);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       lines,
+                                                                                                                                       cs,
+                                                                                                                                       options)));
     }
 
     @Override
@@ -913,14 +813,9 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  content,
-                                                                                                                                  options);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       content,
+                                                                                                                                       options)));
     }
 
     @Override
@@ -937,15 +832,10 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  content,
-                                                                                                                                  cs,
-                                                                                                                                  options);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       content,
+                                                                                                                                       cs,
+                                                                                                                                       options)));
     }
 
     @Override
@@ -962,15 +852,10 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  content,
-                                                                                                                                  options,
-                                                                                                                                  attrs);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       content,
+                                                                                                                                       options,
+                                                                                                                                       attrs)));
     }
 
     @Override
@@ -989,16 +874,11 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  content,
-                                                                                                                                  cs,
-                                                                                                                                  options,
-                                                                                                                                  attrs);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       content,
+                                                                                                                                       cs,
+                                                                                                                                       options,
+                                                                                                                                       attrs)));
     }
 
     @Override
@@ -1015,15 +895,10 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  content,
-                                                                                                                                  attrs,
-                                                                                                                                  options);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       content,
+                                                                                                                                       attrs,
+                                                                                                                                       options)));
     }
 
     @Override
@@ -1042,16 +917,11 @@ public class IOServiceClusterImpl implements IOService {
 
         return new FileSystemSyncLock<Path>(service.getId(),
                                             new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                  new FutureTask<Path>(new Callable<Path>() {
-                                                                                                         @Override
-                                                                                                         public Path call() throws Exception {
-                                                                                                             return service.write(path,
-                                                                                                                                  content,
-                                                                                                                                  cs,
-                                                                                                                                  attrs,
-                                                                                                                                  options);
-                                                                                                         }
-                                                                                                     }));
+                                                                                                  new FutureTask<>(() -> service.write(path,
+                                                                                                                                       content,
+                                                                                                                                       cs,
+                                                                                                                                       attrs,
+                                                                                                                                       options)));
     }
 
     @Override
@@ -1072,13 +942,10 @@ public class IOServiceClusterImpl implements IOService {
                 } else {
                     new FileSystemSyncLock<Void>(service.getId(),
                                                  new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                       new FutureTask<Void>(new Callable<Void>() {
-                                                                                                              @Override
-                                                                                                              public Void call() throws Exception {
-                                                                                                                  out.close();
-                                                                                                                  return null;
-                                                                                                              }
-                                                                                                          }));
+                                                                                                       new FutureTask<>(() -> {
+                                                                                                           out.close();
+                                                                                                           return null;
+                                                                                                       }));
                 }
             }
         };
@@ -1098,13 +965,10 @@ public class IOServiceClusterImpl implements IOService {
                 } else {
                     new FileSystemSyncLock<Void>(service.getId(),
                                                  new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                       new FutureTask<Void>(new Callable<Void>() {
-                                                                                                              @Override
-                                                                                                              public Void call() throws Exception {
-                                                                                                                  sbc.close();
-                                                                                                                  return null;
-                                                                                                              }
-                                                                                                          }));
+                                                                                                       new FutureTask<>(() -> {
+                                                                                                           sbc.close();
+                                                                                                           return null;
+                                                                                                       }));
                 }
             }
         };
@@ -1126,13 +990,10 @@ public class IOServiceClusterImpl implements IOService {
                 } else {
                     new FileSystemSyncLock<Void>(service.getId(),
                                                  new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                       new FutureTask<Void>(new Callable<Void>() {
-                                                                                                              @Override
-                                                                                                              public Void call() throws Exception {
-                                                                                                                  sbc.close();
-                                                                                                                  return null;
-                                                                                                              }
-                                                                                                          }));
+                                                                                                       new FutureTask<>(() -> {
+                                                                                                           sbc.close();
+                                                                                                           return null;
+                                                                                                       }));
                 }
             }
         };
@@ -1152,13 +1013,10 @@ public class IOServiceClusterImpl implements IOService {
                 } else {
                     new FileSystemSyncLock<Void>(service.getId(),
                                                  new FileSystemMetadata(path.getFileSystem())).execute(clusterService,
-                                                                                                       new FutureTask<Void>(new Callable<Void>() {
-                                                                                                              @Override
-                                                                                                              public Void call() throws Exception {
-                                                                                                                  superClose();
-                                                                                                                  return null;
-                                                                                                              }
-                                                                                                          }));
+                                                                                                       new FutureTask<>(() -> {
+                                                                                                           superClose();
+                                                                                                           return null;
+                                                                                                       }));
                 }
             }
 
@@ -1296,7 +1154,7 @@ public class IOServiceClusterImpl implements IOService {
         }
 
         private String[] cleanup(final String... split) {
-            final List<String> result = new ArrayList<String>(split.length);
+            final List<String> result = new ArrayList<>(split.length);
             for (final String s : split) {
                 if (s.startsWith("git://")) {
                     result.add(s);
@@ -1330,8 +1188,8 @@ public class IOServiceClusterImpl implements IOService {
                                      fsInfo.getUri());
                     i++;
                 }
-                return new Pair<MessageType, Map<String, String>>(QUERY_FOR_FS_RESULT,
-                                                                  replyContent);
+                return new Pair<>(QUERY_FOR_FS_RESULT,
+                                  replyContent);
             }
             return null;
         }

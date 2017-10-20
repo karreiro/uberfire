@@ -94,15 +94,15 @@ public class GitIOServiceDotFileTest extends CommonIOExceptionsServiceDotFileTes
 
         final URI newRepo = URI.create("git://" + new Date().getTime() + "-repo-test");
         ioService().newFileSystem(newRepo,
-                                  new HashMap<String, Object>());
+                                  new HashMap<>());
 
         final URI newRepo2 = URI.create("git://" + new Date().getTime() + "-repo2-test");
         ioService().newFileSystem(newRepo2,
-                                  new HashMap<String, Object>());
+                                  new HashMap<>());
 
         final URI newRepo3 = URI.create("git://" + new Date().getTime() + "-repo3-test");
         ioService().newFileSystem(newRepo3,
-                                  new HashMap<String, Object>());
+                                  new HashMap<>());
 
         final Iterator<FileSystemMetadata> iterator = ioService.getFileSystemMetadata().iterator();
 
@@ -212,7 +212,7 @@ public class GitIOServiceDotFileTest extends CommonIOExceptionsServiceDotFileTes
 
             try {
                 ioService().newFileSystem(newRepo,
-                                          new HashMap<String, Object>());
+                                          new HashMap<>());
             } catch (final Exception ex) {
             } finally {
                 created = true;

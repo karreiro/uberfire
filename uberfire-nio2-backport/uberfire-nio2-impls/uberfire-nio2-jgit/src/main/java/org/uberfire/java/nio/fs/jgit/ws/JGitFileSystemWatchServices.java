@@ -35,7 +35,7 @@ public class JGitFileSystemWatchServices implements Serializable {
 
     public WatchService newWatchService(String fsName) {
         final JGitWatchService ws = new JGitWatchService(fsName,
-                                                         p -> watchServices.remove(p));
+                                                         watchServices::remove);
         watchServices.add(ws);
         return ws;
     }
@@ -80,8 +80,7 @@ public class JGitFileSystemWatchServices implements Serializable {
     }
 
     public void close() {
-        watchServices.forEach(ws -> ws.closeWithoutNotifyParent());
+        watchServices.forEach(JGitWatchService::closeWithoutNotifyParent);
         watchServices.clear();
     }
-
 }

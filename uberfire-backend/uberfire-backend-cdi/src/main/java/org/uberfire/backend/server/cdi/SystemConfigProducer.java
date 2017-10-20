@@ -84,13 +84,7 @@ public class SystemConfigProducer implements Extension {
 
     private final List<OrderedBean> startupEagerBeans = new LinkedList<OrderedBean>();
     private final List<OrderedBean> startupBootstrapBeans = new LinkedList<OrderedBean>();
-    private final Comparator<OrderedBean> priorityComparator = new Comparator<OrderedBean>() {
-        @Override
-        public int compare(final OrderedBean o1,
-                           final OrderedBean o2) {
-            return o1.priority - o2.priority;
-        }
-    };
+    private final Comparator<OrderedBean> priorityComparator = (o1, o2) -> o1.priority - o2.priority;
     private boolean systemFSNotExists = true;
     private boolean ioStrategyBeanNotFound = true;
 
@@ -516,8 +510,6 @@ public class SystemConfigProducer implements Extension {
 
     public static class DummyFileSystem implements FileSystem {
 
-        private FileSystemState state = FileSystemState.NORMAL;
-
         @Override
         public FileSystemProvider provider() {
             return null;
@@ -599,14 +591,6 @@ public class SystemConfigProducer implements Extension {
                             final int priority) {
             this.bean = bean;
             this.priority = priority;
-        }
-    }
-
-    private class DummyStarable implements Startable {
-
-        @Override
-        public void start() {
-
         }
     }
 

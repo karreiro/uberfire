@@ -81,7 +81,7 @@ public class DotFileAttrViewTest {
     public void testDotFileAttrAccess() throws IOException {
         final URI newRepo = URI.create("git://" + new Date().getTime() + "-repo-test-3");
         ioService().newFileSystem(newRepo,
-                                  new HashMap<String, Object>());
+                                  new HashMap<>());
 
         final Path dir = ioService().get(newRepo);
         final Path file = dir.resolve("myFile.txt");
@@ -106,7 +106,7 @@ public class DotFileAttrViewTest {
 
         ioService().write(file,
                           "mycontent",
-                          Collections.<OpenOption>emptySet(),
+                          Collections.emptySet(),
                           new FileAttribute<Object>() {
                               @Override
                               public String name() {
@@ -198,8 +198,8 @@ public class DotFileAttrViewTest {
 
             try {
                 ioService().newFileSystem(newRepo,
-                                          new HashMap<String, Object>());
-            } catch (final Exception ex) {
+                                          new HashMap<>());
+            } catch (final Exception ignored) {
             } finally {
                 created = true;
             }

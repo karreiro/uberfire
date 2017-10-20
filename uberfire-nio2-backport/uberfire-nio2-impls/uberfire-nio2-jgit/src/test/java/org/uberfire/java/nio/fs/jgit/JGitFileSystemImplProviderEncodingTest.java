@@ -46,13 +46,12 @@ public class JGitFileSystemImplProviderEncodingTest extends AbstractTestInfra {
         return gitPrefs;
     }
 
-
     @Test
     public void test() throws IOException {
         final URI originRepo = URI.create("git://encoding-origin-name");
 
         final JGitFileSystem origin = (JGitFileSystem) provider.newFileSystem(originRepo,
-                                                                                      Collections.emptyMap());
+                                                                              Collections.emptyMap());
 
         new Commit(origin.getGit(),
                    "master",

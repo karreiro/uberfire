@@ -1293,22 +1293,12 @@ public class JGitFileSystemImplProviderTest extends AbstractTestInfra {
         outStream4.close();
 
         final DirectoryStream<Path> stream1 = provider.newDirectoryStream(provider.getPath(URI.create("git://user_branch@filter-dirstream-test-repo/")),
-                                                                          new DirectoryStream.Filter<Path>() {
-                                                                              @Override
-                                                                              public boolean accept(final Path entry) throws org.uberfire.java.nio.IOException {
-                                                                                  return entry.toString().endsWith(".xxx");
-                                                                              }
-                                                                          });
+                                                                          entry -> entry.toString().endsWith(".xxx"));
 
         assertThat(stream1).isNotNull().hasSize(1).contains(path4);
 
         final DirectoryStream<Path> stream2 = provider.newDirectoryStream(provider.getPath(URI.create("git://master@filter-dirstream-test-repo/")),
-                                                                          new DirectoryStream.Filter<Path>() {
-                                                                              @Override
-                                                                              public boolean accept(final Path entry) throws org.uberfire.java.nio.IOException {
-                                                                                  return false;
-                                                                              }
-                                                                          });
+                                                                          entry -> false);
 
         assertThat(stream2).isNotNull().hasSize(0);
     }
@@ -1608,26 +1598,6 @@ public class JGitFileSystemImplProviderTest extends AbstractTestInfra {
                                   true);
             failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException ignored) {
-        }
-    }
-
-    private static class MyInvalidFileAttributeView implements BasicFileAttributeView {
-
-        @Override
-        public BasicFileAttributes readAttributes() throws org.uberfire.java.nio.IOException {
-            return null;
-        }
-
-        @Override
-        public void setTimes(FileTime lastModifiedTime,
-                             FileTime lastAccessTime,
-                             FileTime createTime) throws org.uberfire.java.nio.IOException {
-
-        }
-
-        @Override
-        public String name() {
-            return null;
         }
     }
 
@@ -2080,8 +2050,8 @@ public class JGitFileSystemImplProviderTest extends AbstractTestInfra {
 
         URI composedName = URI.create("git://user1/dora");
 
-        FileSystem fsComposedName1 = provider.newFileSystem(composedName,
-                                                            EMPTY_ENV);
+        provider.newFileSystem(composedName,
+                               EMPTY_ENV);
 
         URI composedFileName1 = URI.create("git://user1/dora/file.txt");
 
@@ -2107,10 +2077,6 @@ public class JGitFileSystemImplProviderTest extends AbstractTestInfra {
 
         assertEquals(fsComposedName1,
                      objectRepositoryResolver.resolveFileSystem(fsComposedName1.getGit().getRepository()));
-    }
-
-    private interface MyAttrs extends BasicFileAttributes {
-
     }
 
     private VersionRecord makeVersionRecord(final String author,
@@ -2160,5 +2126,29 @@ public class JGitFileSystemImplProviderTest extends AbstractTestInfra {
             commits.add(commit);
         }
         return commits;
+    }
+
+    private interface MyAttrs extends BasicFileAttributes {
+
+    }
+
+    private static class MyInvalidFileAttributeView implements BasicFileAttributeView {
+
+        @Override
+        public BasicFileAttributes readAttributes() throws org.uberfire.java.nio.IOException {
+            return null;
+        }
+
+        @Override
+        public void setTimes(FileTime lastModifiedTime,
+                             FileTime lastAccessTime,
+                             FileTime createTime) throws org.uberfire.java.nio.IOException {
+
+        }
+
+        @Override
+        public String name() {
+            return null;
+        }
     }
 }

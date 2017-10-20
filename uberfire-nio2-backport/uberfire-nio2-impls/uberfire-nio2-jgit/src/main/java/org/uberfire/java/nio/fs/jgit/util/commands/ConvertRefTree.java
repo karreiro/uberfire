@@ -113,11 +113,11 @@ public class ConvertRefTree {
                         .build();
                 git.updateRepo(repo);
             }
-            final File commited = new File(git.getRepository().getDirectory(),
-                                           txnCommitted);
+            final File committed = new File(git.getRepository().getDirectory(),
+                                            txnCommitted);
             final File accepted = new File(git.getRepository().getDirectory(),
                                            txnNamespace + "accepted");
-            Files.copy(commited.toPath(),
+            Files.copy(committed.toPath(),
                        accepted.toPath(),
                        StandardCopyOption.REPLACE_EXISTING);
         }

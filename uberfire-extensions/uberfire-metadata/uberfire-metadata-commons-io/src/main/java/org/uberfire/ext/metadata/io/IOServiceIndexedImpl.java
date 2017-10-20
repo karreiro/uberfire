@@ -200,20 +200,10 @@ public class IOServiceIndexedImpl extends IOServiceDotFileImpl {
     public FileSystem getFileSystem(final URI uri)
             throws IllegalArgumentException, FileSystemNotFoundException,
             ProviderNotFoundException, SecurityException {
-        try {
-            final FileSystem fs = super.getFileSystem(uri);
-            indexIfFresh(fs);
-            setupWatchService(fs);
-            return fs;
-        } catch (final IllegalArgumentException ex) {
-            throw ex;
-        } catch (final FileSystemNotFoundException ex) {
-            throw ex;
-        } catch (final ProviderNotFoundException ex) {
-            throw ex;
-        } catch (final SecurityException ex) {
-            throw ex;
-        }
+        final FileSystem fs = super.getFileSystem(uri);
+        indexIfFresh(fs);
+        setupWatchService(fs);
+        return fs;
     }
 
     @Override
@@ -221,23 +211,11 @@ public class IOServiceIndexedImpl extends IOServiceDotFileImpl {
                                     final Map<String, ?> env)
             throws IllegalArgumentException, FileSystemAlreadyExistsException,
             ProviderNotFoundException, IOException, SecurityException {
-        try {
-            final FileSystem fs = super.newFileSystem(uri,
-                                                      env);
-            index(fs);
-            setupWatchService(fs);
-            return fs;
-        } catch (final IllegalArgumentException ex) {
-            throw ex;
-        } catch (final FileSystemAlreadyExistsException ex) {
-            throw ex;
-        } catch (final ProviderNotFoundException ex) {
-            throw ex;
-        } catch (final IOException ex) {
-            throw ex;
-        } catch (final SecurityException ex) {
-            throw ex;
-        }
+        final FileSystem fs = super.newFileSystem(uri,
+                                                  env);
+        index(fs);
+        setupWatchService(fs);
+        return fs;
     }
 
     @Override

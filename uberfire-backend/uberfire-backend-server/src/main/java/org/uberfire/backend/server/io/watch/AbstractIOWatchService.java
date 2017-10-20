@@ -58,20 +58,17 @@ public abstract class AbstractIOWatchService implements IOWatchService,
 
     private final List<String> fileSystems = new ArrayList<>();
     private final List<WatchService> watchServices = new ArrayList<>();
-    protected boolean isDisposed = false;
-
-    private boolean started;
     private final Set<AsyncWatchService> watchThreads = new HashSet<>();
+    private final Set<Future<?>> jobs = new CopyOnWriteArraySet<>();
+    protected boolean isDisposed = false;
+    private boolean started;
     private Event<ResourceBatchChangesEvent> resourceBatchChanges;
     private Event<ResourceUpdatedEvent> resourceUpdatedEvent;
     private Event<ResourceRenamedEvent> resourceRenamedEvent;
     private Event<ResourceDeletedEvent> resourceDeletedEvent;
     private Event<ResourceAddedEvent> resourceAddedEvent;
     private ExecutorService executorService;
-
     private IOWatchServiceExecutor executor = null;
-
-    private final Set<Future<?>> jobs = new CopyOnWriteArraySet<Future<?>>();
 
     public AbstractIOWatchService() {
     }

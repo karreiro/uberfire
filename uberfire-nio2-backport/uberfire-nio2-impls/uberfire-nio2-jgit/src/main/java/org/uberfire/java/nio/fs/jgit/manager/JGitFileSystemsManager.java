@@ -39,10 +39,8 @@ public class JGitFileSystemsManager {
     private final Set<String> closedFileSystems = new HashSet<>();
 
     private final Set<String> fileSystemsRoot = new HashSet<>();
-
-    private JGitFileSystemProvider jGitFileSystemProvider;
-
     private final JGitFileSystemsCache fsCache;
+    private JGitFileSystemProvider jGitFileSystemProvider;
 
     public JGitFileSystemsManager(JGitFileSystemProvider jGitFileSystemProvider,
                                   JGitFileSystemProviderConfiguration config) {
