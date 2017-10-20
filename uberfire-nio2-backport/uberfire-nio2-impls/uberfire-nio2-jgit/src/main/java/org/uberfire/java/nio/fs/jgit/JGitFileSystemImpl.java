@@ -60,8 +60,8 @@ import org.uberfire.java.nio.fs.jgit.ws.JGitFileSystemsEventsManager;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static org.eclipse.jgit.lib.Repository.shortenRefName;
-import static org.uberfire.commons.validation.PortablePreconditions.checkNotEmpty;
-import static org.uberfire.commons.validation.PortablePreconditions.checkNotNull;
+import static org.kie.soup.commons.validation.PortablePreconditions.checkNotEmpty;
+import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
 public class JGitFileSystemImpl implements JGitFileSystem {
 
@@ -353,10 +353,10 @@ public class JGitFileSystemImpl implements JGitFileSystem {
     }
 
     @Override
-    public void publishEvents(final Path watchable,
+    public void publishEvents(final Path watchableRoot,
                               final List<WatchEvent<?>> elist) {
         fsEventsManager.publishEvents(name,
-                                      watchable,
+                                      watchableRoot,
                                       elist);
     }
 

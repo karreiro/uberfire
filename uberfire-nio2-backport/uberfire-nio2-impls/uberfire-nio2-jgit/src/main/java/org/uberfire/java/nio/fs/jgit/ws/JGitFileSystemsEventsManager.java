@@ -25,6 +25,8 @@ import org.uberfire.java.nio.IOException;
 import org.uberfire.java.nio.file.Path;
 import org.uberfire.java.nio.file.WatchEvent;
 import org.uberfire.java.nio.file.WatchService;
+import org.uberfire.java.nio.fs.jgit.ws.cluster.ClusterParameters;
+import org.uberfire.java.nio.fs.jgit.ws.cluster.JGitEventsBroadcast;
 
 public class JGitFileSystemsEventsManager {
 
@@ -32,17 +34,60 @@ public class JGitFileSystemsEventsManager {
 
     private final Map<String, JGitFileSystemWatchServices> fsWatchServices = new ConcurrentHashMap<>();
 
+    private final ClusterParameters clusterParameters;
+
+    JGitEventsBroadcast jGitEventsBroadcast;
+
+    public JGitFileSystemsEventsManager() {
+        clusterParameters = loadClusterParameters();
+
+        if (clusterParameters.isAppFormerClustered()) {
+            setupJGitEventsBroadcast();
+        }
+    }
+
+    ClusterParameters loadClusterParameters() {
+        return new ClusterParameters();
+    }
+
+    void setupJGitEventsBroadcast() {
+        jGitEventsBroadcast = new JGitEventsBroadcast(clusterParameters,
+                                                      w -> publishEvents(w.getFsName(),
+                                                                         w.getWatchable(),
+                                                                         w.getEvents(),
+                                                                         false));
+    }
+
     public WatchService newWatchService(String fsName)
             throws UnsupportedOperationException, IOException {
         fsWatchServices.putIfAbsent(fsName,
-                                    new JGitFileSystemWatchServices());
+                                    createFSWatchServicesManager());
+
+        if (jGitEventsBroadcast != null) {
+            jGitEventsBroadcast.register(fsName);
+        }
 
         return fsWatchServices.get(fsName).newWatchService(fsName);
+    }
+
+    JGitFileSystemWatchServices createFSWatchServicesManager() {
+        return new JGitFileSystemWatchServices();
     }
 
     public void publishEvents(String fsName,
                               Path watchable,
                               List<WatchEvent<?>> elist) {
+
+        publishEvents(fsName,
+                      watchable,
+                      elist,
+                      true);
+    }
+
+    public void publishEvents(String fsName,
+                              Path watchable,
+                              List<WatchEvent<?>> elist,
+                              boolean broadcastEvents) {
 
         JGitFileSystemWatchServices watchService = fsWatchServices.get(fsName);
 
@@ -52,6 +97,16 @@ public class JGitFileSystemsEventsManager {
 
         watchService.publishEvents(watchable,
                                    elist);
+
+        if (shouldIBroadcast(broadcastEvents)) {
+            jGitEventsBroadcast.broadcast(fsName,
+                                          watchable,
+                                          elist);
+        }
+    }
+
+    private boolean shouldIBroadcast(boolean broadcastEvents) {
+        return broadcastEvents && jGitEventsBroadcast != null;
     }
 
     public void close(String name) {
@@ -66,5 +121,16 @@ public class JGitFileSystemsEventsManager {
                              ex);
             }
         }
+        if (jGitEventsBroadcast != null) {
+            jGitEventsBroadcast.close();
+        }
+    }
+
+    JGitEventsBroadcast getjGitEventsBroadcast() {
+        return jGitEventsBroadcast;
+    }
+
+    Map<String, JGitFileSystemWatchServices> getFsWatchServices() {
+        return fsWatchServices;
     }
 }

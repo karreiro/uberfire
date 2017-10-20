@@ -63,7 +63,7 @@ public class AppsPersistenceImpl implements AppsPersistenceAPI {
     @PostConstruct
     public void setup() {
         try {
-            fileSystem = ioService.newFileSystem(URI.create("default://plugins"),
+            fileSystem = ioService.newFileSystem(URI.create("default://system_ou/plugins"),
                                                  new HashMap<String, Object>() {{
                                                      put("init",
                                                          Boolean.TRUE);
@@ -71,7 +71,7 @@ public class AppsPersistenceImpl implements AppsPersistenceAPI {
                                                          Boolean.TRUE);
                                                  }});
         } catch (final FileSystemAlreadyExistsException e) {
-            fileSystem = ioService.getFileSystem(URI.create("default://plugins"));
+            fileSystem = ioService.getFileSystem(URI.create("default://system_ou/plugins"));
         }
         this.root = fileSystem.getRootDirectories().iterator().next();
     }

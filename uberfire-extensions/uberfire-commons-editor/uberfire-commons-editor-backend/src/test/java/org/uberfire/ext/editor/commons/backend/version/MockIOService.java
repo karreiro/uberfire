@@ -99,7 +99,7 @@ public class MockIOService
     }
 
     @Override
-    public Iterable<FileSystemMetadata> getFileSystemsMetadata() {
+    public Iterable<FileSystemMetadata> getFileSystemMetadata() {
         return null;
     }
 

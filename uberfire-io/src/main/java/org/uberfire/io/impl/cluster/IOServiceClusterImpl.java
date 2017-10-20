@@ -275,7 +275,7 @@ public class IOServiceClusterImpl implements IOService {
         if (service.getLockControl().getHoldCount() == 0) {
             final AtomicInteger process = new AtomicInteger(batchFileSystems.size());
 
-            for (final FileSystemMetadata fsInfo : service.getFileSystemsMetadata()) {
+            for (final FileSystemMetadata fsInfo : service.getFileSystemMetadata()) {
 
                 if (fsInfo.IsAFileSystemID() &&
                         batchFileSystems.contains(fsInfo.getId())) {
@@ -324,8 +324,8 @@ public class IOServiceClusterImpl implements IOService {
     }
 
     @Override
-    public Iterable<FileSystemMetadata> getFileSystemsMetadata() {
-        return service.getFileSystemsMetadata();
+    public Iterable<FileSystemMetadata> getFileSystemMetadata() {
+        return service.getFileSystemMetadata();
     }
 
     @Override
@@ -1317,7 +1317,7 @@ public class IOServiceClusterImpl implements IOService {
                 int i = 0;
 
                 final Set<FileSystemMetadata> fileSystemsInfo = new HashSet<FileSystemMetadata>();
-                for (FileSystemMetadata fs : service.getFileSystemsMetadata()) {
+                for (FileSystemMetadata fs : service.getFileSystemMetadata()) {
                     fileSystemsInfo.add(fs);
                 }
 

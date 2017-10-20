@@ -153,10 +153,10 @@ import org.uberfire.java.nio.security.SecuredFileSystemProvider;
 
 import static java.util.Collections.emptyList;
 import static org.eclipse.jgit.lib.Constants.DOT_GIT_EXT;
-import static org.uberfire.commons.data.Pair.newPair;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkCondition;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotEmpty;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
+import static org.uberfire.commons.data.Pair.newPair;
 import static org.uberfire.java.nio.base.dotfiles.DotFileUtils.buildDotFile;
 import static org.uberfire.java.nio.base.dotfiles.DotFileUtils.dot;
 import static org.uberfire.java.nio.file.StandardOpenOption.READ;
@@ -2428,7 +2428,7 @@ public class JGitFileSystemProvider implements SecuredFileSystemProvider,
             WatchEvent e = new JGitWatchEvent(sessionId,
                                               userName,
                                               message,
-                                              diffEntry,
+                                              diffEntry.getChangeType().name(),
                                               oldPath,
                                               newPath);
             events.add(e);

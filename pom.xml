@@ -84,6 +84,8 @@
     <!-- WildFly version used together with the GWT's Super Dev Mode -->
     <version.org.wildfly.gwt.sdm>10.1.0.Final</version.org.wildfly.gwt.sdm>
 
+    <version.org.apache.activemq.artemis>2.2.0</version.org.apache.activemq.artemis>
+
     <!-- Lienzo core upgrade required by Stunner. Can be removed once IP BOM is upgraded.-->
     <version.com.ahome-it.lienzo-core>2.0.292-RELEASE</version.com.ahome-it.lienzo-core>
     <version.com.ahome-it.lienzo-tests>2.0.292-RELEASE</version.com.ahome-it.lienzo-tests>
@@ -872,6 +874,18 @@
         <groupId>org.wildfly.security</groupId>
         <artifactId>wildfly-elytron</artifactId>
         <version>${version.org.wildfly.security}</version>
+      </dependency>
+      <!-- Apache ActiveMQ/Artemis -->
+      <dependency>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>artemis-jms-client</artifactId>
+        <version>${version.org.apache.activemq.artemis}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>

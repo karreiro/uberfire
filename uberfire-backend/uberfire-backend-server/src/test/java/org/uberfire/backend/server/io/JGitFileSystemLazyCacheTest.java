@@ -47,6 +47,8 @@ public class JGitFileSystemLazyCacheTest {
     @After
     public void cleanupFileSystem() {
         fsUtils.cleanup();
+        System.setProperty("org.uberfire.nio.jgit.cache.instances",
+                           "");
     }
 
     @Test
@@ -75,8 +77,6 @@ public class JGitFileSystemLazyCacheTest {
 
     @Test
     public void regenerateFSCache() throws IOException {
-        assertTrue(true);
-
         String defaultRepo = "git://amend-repo-test";
 
         Path firstWriteFS1 = fsUtils.getIoService().get(URI.create(defaultRepo + "/init1.file"));

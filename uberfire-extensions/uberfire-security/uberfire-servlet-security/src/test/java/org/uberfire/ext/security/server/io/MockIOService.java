@@ -89,7 +89,7 @@ public class MockIOService implements IOService {
     }
 
     @Override
-    public Iterable<FileSystemMetadata> getFileSystemsMetadata() {
+    public Iterable<FileSystemMetadata> getFileSystemMetadata() {
         return null;
     }
 

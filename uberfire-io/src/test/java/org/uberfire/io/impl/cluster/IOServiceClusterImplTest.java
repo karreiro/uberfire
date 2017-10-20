@@ -57,7 +57,7 @@ public class IOServiceClusterImplTest {
 
         List<FileSystemMetadata> fsInfo = Arrays.asList(new FileSystemMetadata(mockedFSId),
                                                         new FileSystemMetadata(mockedFS));
-        when(serviceLockable.getFileSystemsMetadata()).thenReturn(fsInfo);
+        when(serviceLockable.getFileSystemMetadata()).thenReturn(fsInfo);
         when(batchLockControl.getHoldCount()).thenReturn(0);
         when(serviceLockable.getLockControl()).thenReturn(batchLockControl);
 

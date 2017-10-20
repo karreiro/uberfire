@@ -83,4 +83,5 @@ public class JGitFileSystemWatchServices implements Serializable {
         watchServices.forEach(ws -> ws.closeWithoutNotifyParent());
         watchServices.clear();
     }
+
 }

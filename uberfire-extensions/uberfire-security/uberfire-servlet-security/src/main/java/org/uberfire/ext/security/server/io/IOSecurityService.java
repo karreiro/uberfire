@@ -151,8 +151,8 @@ public class IOSecurityService implements IOService {
     }
 
     @Override
-    public Iterable<FileSystemMetadata> getFileSystemsMetadata() {
-        final Iterable<FileSystemMetadata> _result = service.getFileSystemsMetadata();
+    public Iterable<FileSystemMetadata> getFileSystemMetadata() {
+        final Iterable<FileSystemMetadata> _result = service.getFileSystemMetadata();
         final Set<FileSystemMetadata> result = new HashSet<>();
         for (final FileSystemMetadata fs : _result) {
             if (authManager.authorize(toResource(fs),

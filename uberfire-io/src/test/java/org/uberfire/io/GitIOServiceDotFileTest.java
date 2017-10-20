@@ -104,7 +104,7 @@ public class GitIOServiceDotFileTest extends CommonIOExceptionsServiceDotFileTes
         ioService().newFileSystem(newRepo3,
                                   new HashMap<String, Object>());
 
-        final Iterator<FileSystemMetadata> iterator = ioService.getFileSystemsMetadata().iterator();
+        final Iterator<FileSystemMetadata> iterator = ioService.getFileSystemMetadata().iterator();
 
         assertNotNull(iterator);
 

@@ -73,7 +73,7 @@ public interface IOService extends PriorityDisposable {
     Path get(final URI uri)
             throws IllegalArgumentException, FileSystemNotFoundException, SecurityException;
 
-    Iterable<FileSystemMetadata> getFileSystemsMetadata();
+    Iterable<FileSystemMetadata> getFileSystemMetadata();
 
     FileSystem getFileSystem(final URI uri)
             throws IllegalArgumentException, FileSystemNotFoundException,

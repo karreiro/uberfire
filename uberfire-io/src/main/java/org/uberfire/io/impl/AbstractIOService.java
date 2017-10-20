@@ -209,7 +209,7 @@ public abstract class AbstractIOService implements IOServiceIdentifiable,
     }
 
     @Override
-    public Iterable<FileSystemMetadata> getFileSystemsMetadata() {
+    public Iterable<FileSystemMetadata> getFileSystemMetadata() {
         return fileSystems;
     }
 
@@ -585,7 +585,7 @@ public abstract class AbstractIOService implements IOServiceIdentifiable,
     @Override
     public void dispose() {
         isDisposed = true;
-        for (final FileSystemMetadata fileSystem : getFileSystemsMetadata()) {
+        for (final FileSystemMetadata fileSystem : getFileSystemMetadata()) {
             try {
                 fileSystem.closeFS();
             } catch (final Exception ignored) {
