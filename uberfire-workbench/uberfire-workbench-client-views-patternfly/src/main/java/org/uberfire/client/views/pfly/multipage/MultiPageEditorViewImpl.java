@@ -18,6 +18,7 @@ package org.uberfire.client.views.pfly.multipage;
 
 import javax.enterprise.context.Dependent;
 
+import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.shared.event.TabShowEvent;
 import org.gwtbootstrap3.client.shared.event.TabShowHandler;
 import org.gwtbootstrap3.client.shared.event.TabShownEvent;
@@ -72,11 +73,38 @@ public class MultiPageEditorViewImpl extends ResizeTabPanel implements MultiPage
         }
     }
 
+    public void addPage(int index, final Page page) {
+        final TabPanelEntry tab = new TabPanelEntry(page.getLabel(),
+                                                    page.getView().asWidget());
+
+        this.insertItem(tab, index);
+        if (this.getActiveTab() == null) {
+            tab.showTab();
+            tab.setActive(true);
+        }
+    }
+
     public void selectPage(int index) {
         this.selectTabIndex(index);
     }
 
     public int selectedPage() {
         return this.getSelectedTabIndex();
+    }
+
+    public void disablePage(int index) {
+
+        final Widget tab = this.tabBar.getWidget(index);
+
+        tab.addStyleName("disabled");
+        tab.getElement().getStyle().setProperty("pointerEvents", "none");
+    }
+
+    public void enablePage(int index) {
+
+        final Widget tab = this.tabBar.getWidget(index);
+
+        tab.removeStyleName("disabled");
+        tab.getElement().getStyle().clearProperty("pointerEvents");
     }
 }

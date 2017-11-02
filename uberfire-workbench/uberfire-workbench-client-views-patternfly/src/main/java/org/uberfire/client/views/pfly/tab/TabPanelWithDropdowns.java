@@ -124,6 +124,10 @@ public class TabPanelWithDropdowns extends Composite {
                           TabShownEvent.getType());
     }
 
+    public NavTabs getTabBar() {
+        return tabBar;
+    }
+
     /**
      * Creates an empty tab panel.
      */
@@ -158,6 +162,18 @@ public class TabPanelWithDropdowns extends Composite {
                                     tab.getTabWidget().addShownHandler(individualTabShownHandler));
         activatableWidgets.add(tab.getTabWidget());
         tabBar.add(tab.getTabWidget());
+        tabContent.add(tab.getContentPane());
+        resizeTabContent();
+    }
+
+    public void insertItem(TabPanelEntry tab, int index) {
+        allContentTabs.add(tab);
+        tabHandlerRegistrations.put(tab,
+                                    tab.getTabWidget().addShowHandler(individualTabShowHandler));
+        tabHandlerRegistrations.put(tab,
+                                    tab.getTabWidget().addShownHandler(individualTabShownHandler));
+        activatableWidgets.add(tab.getTabWidget());
+        tabBar.insert(tab.getTabWidget(), index);
         tabContent.add(tab.getContentPane());
         resizeTabContent();
     }

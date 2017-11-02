@@ -17,16 +17,25 @@
 package org.uberfire.client.workbench.widgets.multipage;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import org.gwtbootstrap3.client.ui.NavTabs;
 
 public interface MultiPageEditor extends IsWidget {
 
     void addPage(final Page page);
+
+    void addPage(int i, final Page page);
+
+    void disablePage(int index);
+
+    void enablePage(int index);
 
     void selectPage(final int index);
 
     int selectedPage();
 
     MultiPageEditorView getView();
+
+    NavTabs getTabBar();
 
     void addWidget(final IsWidget widget,
                    final String label);

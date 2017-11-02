@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import org.gwtbootstrap3.client.ui.NavTabs;
 import org.uberfire.client.workbench.widgets.multipage.MultiPageEditor;
 import org.uberfire.client.workbench.widgets.multipage.MultiPageEditorView;
 import org.uberfire.client.workbench.widgets.multipage.Multiple;
@@ -37,12 +38,24 @@ public class MultiPageEditorImpl implements MultiPageEditor {
         view.addPage(page);
     }
 
+    public void addPage(int index, final Page page) {
+        view.addPage(index, page);
+    }
+
+    public void disablePage(int index) { view.disablePage(index); }
+
+    public void enablePage(int index) { view.enablePage(index); }
+
     public void selectPage(final int index) {
         view.selectPage(index);
     }
 
     public int selectedPage() {
         return view.selectedPage();
+    }
+
+    public NavTabs getTabBar() {
+        return view.getTabBar();
     }
 
     @Override
